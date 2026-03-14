@@ -1438,10 +1438,14 @@ $pinEnabled = env('TVOS_PIN', '') !== '';
         const FEATURED_APPS = [
             { id: 'open-url', title: 'Open URL', sub: 'Launch any website', iconName: 'public', action: 'openUrl' },
             { id: 'google-search', title: 'Google Search', sub: 'Search the web', iconName: 'search', action: 'googleSearch' },
+            { id: 'google-products', title: 'Google Products', sub: 'Browse Google apps', iconName: 'apps', url: 'https://about.google/products/' },
             { id: 'youtube', title: 'YouTube', sub: 'Video platform', iconName: 'smart_display', url: 'https://www.youtube.com/' },
             { id: 'gmail', title: 'Gmail', sub: 'Email', iconName: 'mail', url: 'https://mail.google.com/' },
             { id: 'drive', title: 'Google Drive', sub: 'Cloud storage', iconName: 'cloud', url: 'https://drive.google.com/' },
             { id: 'maps', title: 'Google Maps', sub: 'Maps', iconName: 'map', url: 'https://maps.google.com/' },
+            { id: 'calendar', title: 'Google Calendar', sub: 'Calendar', iconName: 'calendar_month', url: 'https://calendar.google.com/' },
+            { id: 'photos', title: 'Google Photos', sub: 'Photos', iconName: 'photo_library', url: 'https://photos.google.com/' },
+            { id: 'docs', title: 'Google Docs', sub: 'Documents', iconName: 'description', url: 'https://docs.google.com/' },
             { id: 'wikipedia', title: 'Wikipedia', sub: 'Free encyclopedia', iconName: 'language', url: 'https://www.wikipedia.org/' },
             { id: 'openstreetmap', title: 'OpenStreetMap', sub: 'Free world map', iconName: 'map', url: 'https://www.openstreetmap.org/' },
             { id: 'archive', title: 'Internet Archive', sub: 'Free library of media', iconName: 'inventory_2', url: 'https://archive.org/' },
@@ -1808,16 +1812,88 @@ $pinEnabled = env('TVOS_PIN', '') !== '';
         function buildSettingsItems() {
             const s = state.settings ?? loadSettings();
             state.settings = s;
+            let lastPlaybackValue = 'None';
+            try {
+                const raw = localStorage.getItem(LAST_PLAY_KEY);
+                if (raw) {
+                    const parsed = JSON.parse(raw);
+                    const title = typeof parsed?.title === 'string' ? parsed.title : '';
+                    const type = typeof parsed?.type === 'string' ? parsed.type : '';
+                    if (title !== '' && type !== '') {
+                        lastPlaybackValue = `${type}: ${title}`;
+                    } else if (type !== '') {
+                        lastPlaybackValue = type;
+                    }
+                }
+            } catch {
+            }
             const items = [
                 { type: 'toggle', title: 'Autoplay on highlight', meta: 'Play when selecting items', icon: 'play_circle', key: 'autoplayOnHighlight' },
                 { type: 'toggle', title: 'Remember last playback', meta: 'Auto-resume on next load', icon: 'history', key: 'rememberLast' },
                 { type: 'toggle', title: 'Video controls', meta: 'Show/hide native controls', icon: 'tune', key: 'showVideoControls' },
                 { type: 'toggle', title: 'HLS low latency', meta: 'Hls.js low latency mode', icon: 'speed', key: 'hlsLowLatency' },
                 { type: 'toggle', title: 'Background playback', meta: 'Keep playing when switching apps', icon: 'headphones', key: 'backgroundPlayback' },
+                { type: 'toggle', title: 'Reduce motion', meta: 'Disable most animations', icon: 'motion_photos_off', key: 'reduceMotion' },
+                { type: 'toggle', title: '24-hour clock', meta: 'Clock format', icon: 'schedule', key: 'clock24h' },
+                {
+                    type: 'cycle',
+                    title: 'Theme',
+                    meta: 'Accent colors',
+                    icon: 'palette',
+                    key: 'themePreset',
+                    options: [
+                        { label: 'Aqua', value: 'aqua' },
+                        { label: 'Purple', value: 'purple' },
+                        { label: 'Mango', value: 'mango' },
+                        { label: 'Mono', value: 'mono' },
+                    ],
+                },
+                {
+                    type: 'cycle',
+                    title: 'Wallpaper',
+                    meta: 'Background style',
+                    icon: 'wallpaper',
+                    key: 'wallpaperPreset',
+                    options: [
+                        { label: 'Aurora', value: 'aurora' },
+                        { label: 'Mango', value: 'mango' },
+                        { label: 'Midnight', value: 'midnight' },
+                        { label: 'Sunset', value: 'sunset' },
+                    ],
+                },
+                {
+                    type: 'cycle',
+                    title: 'UI scale',
+                    meta: 'Card size',
+                    icon: 'aspect_ratio',
+                    key: 'uiScale',
+                    options: [
+                        { label: '80%', value: 0.8 },
+                        { label: '90%', value: 0.9 },
+                        { label: '100%', value: 1 },
+                        { label: '110%', value: 1.1 },
+                        { label: '120%', value: 1.2 },
+                    ],
+                },
+                {
+                    type: 'cycle',
+                    title: 'Default volume',
+                    meta: 'Applies when starting playback',
+                    icon: 'volume_up',
+                    key: 'defaultVolume',
+                    options: [
+                        { label: '100%', value: 1 },
+                        { label: '75%', value: 0.75 },
+                        { label: '50%', value: 0.5 },
+                        { label: '25%', value: 0.25 },
+                        { label: 'Mute', value: 0 },
+                    ],
+                },
             ];
 
             if (state.osId) {
                 items.push({ type: 'info', title: 'OS ID', meta: '', icon: 'badge', value: String(state.osId) });
+                items.push({ type: 'action', title: 'Copy OS ID', meta: 'Copy to clipboard', icon: 'content_copy', action: 'copy_os_id' });
             }
 
             if (state.server) {
@@ -1828,8 +1904,12 @@ $pinEnabled = env('TVOS_PIN', '') !== '';
             }
 
             items.push(
+                { type: 'info', title: 'Last playback', meta: '', icon: 'history_toggle_off', value: lastPlaybackValue },
+                { type: 'info', title: 'Local storage', meta: '', icon: 'storage', value: `${localStorage.length} items` },
                 { type: 'action', title: 'Check server health', meta: 'Call /api/health', icon: 'health_and_safety', action: 'health' },
                 { type: 'action', title: 'Stop playback', meta: 'Stop all video', icon: 'stop_circle', action: 'stop' },
+                { type: 'action', title: 'Export settings', meta: 'Copy settings JSON', icon: 'download', action: 'export_settings' },
+                { type: 'action', title: 'Import settings', meta: 'Paste settings JSON', icon: 'upload', action: 'import_settings' },
                 { type: 'action', title: 'Reset local settings', meta: 'Clear saved settings & last playback', icon: 'restart_alt', action: 'reset' },
             );
 
@@ -1853,6 +1933,10 @@ $pinEnabled = env('TVOS_PIN', '') !== '';
                 let valueText = '';
                 if (it.type === 'toggle') {
                     valueText = (state.settings?.[it.key] ?? false) ? 'On' : 'Off';
+                } else if (it.type === 'cycle') {
+                    const current = state.settings?.[it.key];
+                    const match = (it.options ?? []).find((o) => o.value === current);
+                    valueText = match ? match.label : 'Change';
                 } else if (it.type === 'info') {
                     valueText = it.value ?? '';
                 } else {
@@ -1890,10 +1974,75 @@ $pinEnabled = env('TVOS_PIN', '') !== '';
                 showToast(`${it.title}: ${next[it.key] ? 'On' : 'Off'}`);
                 return;
             }
+            if (it.type === 'cycle') {
+                const s = state.settings ?? loadSettings();
+                const options = it.options ?? [];
+                if (options.length === 0) return;
+                const current = s[it.key];
+                const currentIdx = options.findIndex((o) => o.value === current);
+                const nextOpt = options[(currentIdx + 1 + options.length) % options.length];
+                const next = { ...s, [it.key]: nextOpt.value };
+                saveSettings(next);
+                renderSettings();
+                showToast(`${it.title}: ${nextOpt.label}`);
+                return;
+            }
             if (it.type === 'action') {
                 if (it.action === 'stop') {
                     stopAllPlayback();
                     showToast('Stopped');
+                    return;
+                }
+                if (it.action === 'copy_os_id') {
+                    const text = state.osId ? String(state.osId) : '';
+                    if (text === '') {
+                        showToast('OS ID not available', 2200);
+                        return;
+                    }
+                    if (navigator.clipboard?.writeText) {
+                        navigator.clipboard.writeText(text)
+                            .then(() => showToast('Copied', 1600))
+                            .catch(() => showToast('Copy failed', 2200));
+                        return;
+                    }
+                    window.prompt('Copy OS ID', text);
+                    return;
+                }
+                if (it.action === 'export_settings') {
+                    const json = JSON.stringify(state.settings ?? loadSettings(), null, 2);
+                    if (navigator.clipboard?.writeText) {
+                        navigator.clipboard.writeText(json)
+                            .then(() => showToast('Settings copied', 1800))
+                            .catch(() => showToast('Copy failed', 2200));
+                        return;
+                    }
+                    window.prompt('Copy settings JSON', json);
+                    return;
+                }
+                if (it.action === 'import_settings') {
+                    const raw = window.prompt('Paste settings JSON');
+                    if (!raw) return;
+                    try {
+                        const parsed = JSON.parse(raw);
+                        const base = loadSettings();
+                        const next = { ...base };
+                        if (typeof parsed?.autoplayOnHighlight === 'boolean') next.autoplayOnHighlight = parsed.autoplayOnHighlight;
+                        if (typeof parsed?.rememberLast === 'boolean') next.rememberLast = parsed.rememberLast;
+                        if (typeof parsed?.showVideoControls === 'boolean') next.showVideoControls = parsed.showVideoControls;
+                        if (typeof parsed?.hlsLowLatency === 'boolean') next.hlsLowLatency = parsed.hlsLowLatency;
+                        if (typeof parsed?.backgroundPlayback === 'boolean') next.backgroundPlayback = parsed.backgroundPlayback;
+                        if (typeof parsed?.reduceMotion === 'boolean') next.reduceMotion = parsed.reduceMotion;
+                        if (typeof parsed?.clock24h === 'boolean') next.clock24h = parsed.clock24h;
+                        if (typeof parsed?.themePreset === 'string') next.themePreset = parsed.themePreset;
+                        if (typeof parsed?.wallpaperPreset === 'string') next.wallpaperPreset = parsed.wallpaperPreset;
+                        if (typeof parsed?.uiScale === 'number') next.uiScale = parsed.uiScale;
+                        if (typeof parsed?.defaultVolume === 'number') next.defaultVolume = parsed.defaultVolume;
+                        saveSettings(next);
+                        renderSettings();
+                        showToast('Imported', 1800);
+                    } catch (e) {
+                        showToast('Invalid JSON', 2200);
+                    }
                     return;
                 }
                 if (it.action === 'reset') {
@@ -2004,6 +2153,10 @@ $pinEnabled = env('TVOS_PIN', '') !== '';
             if (!url) return;
             const s = state.settings ?? loadSettings();
             state.settings = s;
+            const vol = Number(s.defaultVolume);
+            if (Number.isFinite(vol)) {
+                targetVideo.volume = Math.min(1, Math.max(0, vol));
+            }
             if (isHlsUrl(url)) {
                 if (targetVideo.canPlayType('application/vnd.apple.mpegurl')) {
                     targetVideo.src = url;
@@ -2082,7 +2235,7 @@ $pinEnabled = env('TVOS_PIN', '') !== '';
             state.playing = { type: 'channel', id: ch.id, title: ch.name, url: ch.streamUrl };
             nowTitleEl.textContent = ch.name;
             nowSubEl.textContent = ch.streamUrl;
-            rememberLastPlayback({ type: 'channel', id: ch.id });
+            rememberLastPlayback({ type: 'channel', id: ch.id, title: ch.name });
             playUrl(ch.streamUrl, videoEl);
         }
 
@@ -2093,7 +2246,7 @@ $pinEnabled = env('TVOS_PIN', '') !== '';
             state.playing = { type: 'movie', id: mv.id, title: mv.title, url: mv.streamUrl };
             movieNowTitleEl.textContent = mv.title ?? 'Movie';
             movieNowSubEl.textContent = mv.year ? String(mv.year) : String(mv.streamUrl ?? '');
-            rememberLastPlayback({ type: 'movie', id: mv.id });
+            rememberLastPlayback({ type: 'movie', id: mv.id, title: mv.title ?? 'Movie' });
             playUrl(mv.streamUrl, movieVideoEl);
         }
 
