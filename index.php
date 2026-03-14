@@ -560,53 +560,448 @@ $pinEnabled = env('TVOS_PIN', '') !== '';
             .main{grid-template-columns:1fr; min-height:auto}
             .rightBody{grid-template-rows: 240px auto}
         }
+        .webos{
+            height:100%;
+            position:relative;
+            overflow:hidden;
+        }
+        .webosBg{
+            position:absolute;
+            inset:-40px;
+            background:
+                radial-gradient(420px 260px at 18% 30%, rgba(74,214,255,.18), transparent 60%),
+                radial-gradient(520px 320px at 84% 24%, rgba(156,90,255,.16), transparent 62%),
+                radial-gradient(620px 360px at 55% 78%, rgba(255,255,255,.06), transparent 70%);
+            filter: blur(2px);
+            opacity:.9;
+            pointer-events:none;
+        }
+        .statusbar{
+            position:relative;
+            z-index:6;
+            display:flex;
+            align-items:center;
+            justify-content:space-between;
+            padding:18px 26px 10px;
+            gap:18px;
+        }
+        .statusLeft{
+            display:flex;
+            align-items:center;
+            gap:12px;
+            min-width:0;
+        }
+        .brandMark{
+            width:44px;
+            height:44px;
+            border-radius:16px;
+            background:linear-gradient(135deg, rgba(74,214,255,.95), rgba(156,90,255,.85));
+            box-shadow:0 14px 40px rgba(0,0,0,.45);
+            flex:0 0 auto;
+        }
+        .statusText{min-width:0}
+        .statusTitle{
+            margin:0;
+            font-weight:800;
+            font-size:16px;
+            letter-spacing:.2px;
+            white-space:nowrap;
+            overflow:hidden;
+            text-overflow:ellipsis;
+        }
+        .statusSub{
+            margin:0;
+            color:var(--muted);
+            font-size:12px;
+            white-space:nowrap;
+            overflow:hidden;
+            text-overflow:ellipsis;
+        }
+        .statusRight{
+            display:flex;
+            align-items:center;
+            gap:10px;
+            color:var(--muted);
+            font-size:13px;
+            flex:0 0 auto;
+        }
+        .chip{
+            padding:8px 10px;
+            border-radius:999px;
+            background:rgba(255,255,255,.06);
+            border:1px solid rgba(255,255,255,.10);
+            backdrop-filter:blur(12px);
+            color:rgba(255,255,255,.86);
+        }
+        .stageWebos{
+            position:absolute;
+            inset:74px 0 0 0;
+            display:flex;
+            align-items:center;
+            justify-content:center;
+            padding:18px 24px 140px;
+            z-index:4;
+        }
+        .appCard{
+            width:min(1240px, 94vw);
+            height:min(690px, 68vh);
+            background:linear-gradient(180deg, rgba(255,255,255,.10), rgba(255,255,255,.06));
+            border:1px solid rgba(255,255,255,.14);
+            border-radius:26px;
+            backdrop-filter:blur(18px);
+            box-shadow:0 18px 70px rgba(0,0,0,.55);
+            overflow:hidden;
+            display:flex;
+            flex-direction:column;
+            transform-origin: 50% 100%;
+            transition: transform .18s ease, filter .18s ease, opacity .18s ease;
+        }
+        .webos[data-focus="launcher"] .appCard{
+            transform: translateY(26px) scale(.965);
+            filter:saturate(.95);
+        }
+        .appCardHeader{
+            display:flex;
+            align-items:flex-start;
+            justify-content:space-between;
+            gap:16px;
+            padding:18px 18px 12px;
+            border-bottom:1px solid rgba(255,255,255,.10);
+        }
+        .appCardTitleWrap{min-width:0}
+        .appCardTitle{
+            margin:0;
+            font-weight:800;
+            font-size:18px;
+            letter-spacing:.2px;
+            white-space:nowrap;
+            overflow:hidden;
+            text-overflow:ellipsis;
+        }
+        .appCardSub{
+            margin:6px 0 0;
+            color:var(--muted);
+            font-size:13px;
+            white-space:nowrap;
+            overflow:hidden;
+            text-overflow:ellipsis;
+        }
+        .appCardBody{
+            flex:1 1 auto;
+            min-height:0;
+        }
+        .liveView{
+            height:100%;
+            display:grid;
+            grid-template-columns: 1.55fr .95fr;
+            min-height:0;
+        }
+        .playerWrap{
+            position:relative;
+            background:rgba(0,0,0,.55);
+            border-right:1px solid rgba(255,255,255,.10);
+            min-height:0;
+        }
+        video{
+            width:100%;
+            height:100%;
+            object-fit:cover;
+            background:#000;
+        }
+        .playerOverlay{
+            position:absolute;
+            left:16px;
+            right:16px;
+            bottom:16px;
+            display:flex;
+            align-items:flex-end;
+            justify-content:space-between;
+            gap:12px;
+            pointer-events:none;
+        }
+        .nowPlaying{
+            padding:12px 14px;
+            border-radius:18px;
+            background:rgba(0,0,0,.46);
+            border:1px solid rgba(255,255,255,.12);
+            backdrop-filter:blur(14px);
+            min-width:0;
+        }
+        .nowPlayingTitle{
+            margin:0;
+            font-weight:800;
+            font-size:14px;
+            white-space:nowrap;
+            overflow:hidden;
+            text-overflow:ellipsis;
+        }
+        .nowPlayingSub{
+            margin:4px 0 0;
+            font-size:12px;
+            color:rgba(255,255,255,.74);
+            white-space:nowrap;
+            overflow:hidden;
+            text-overflow:ellipsis;
+        }
+        .hint{
+            padding:10px 12px;
+            border-radius:18px;
+            background:rgba(0,0,0,.36);
+            border:1px solid rgba(255,255,255,.10);
+            color:rgba(255,255,255,.78);
+            font-size:12px;
+            backdrop-filter:blur(12px);
+        }
+        .channelPane{
+            display:flex;
+            flex-direction:column;
+            min-height:0;
+            background:rgba(0,0,0,.18);
+        }
+        .channelHeader{
+            display:flex;
+            align-items:center;
+            justify-content:space-between;
+            gap:10px;
+            padding:14px 14px 10px;
+            border-bottom:1px solid rgba(255,255,255,.10);
+        }
+        .channelList{
+            min-height:0;
+            overflow:auto;
+        }
+        .chanItem{
+            display:flex;
+            align-items:center;
+            gap:12px;
+            padding:14px 14px;
+            border-bottom:1px solid rgba(255,255,255,.08);
+            cursor:pointer;
+            outline:none;
+        }
+        .chanItem:focus{
+            box-shadow:var(--focus);
+            background:rgba(74,214,255,.10);
+        }
+        .chanAvatar{
+            width:42px;
+            height:42px;
+            border-radius:16px;
+            background:rgba(255,255,255,.10);
+            border:1px solid rgba(255,255,255,.12);
+            display:grid;
+            place-items:center;
+            overflow:hidden;
+            flex:0 0 auto;
+        }
+        .chanAvatar img{
+            width:100%;
+            height:100%;
+            object-fit:cover;
+        }
+        .chanText{
+            min-width:0;
+            flex:1 1 auto;
+        }
+        .chanName{
+            margin:0;
+            font-weight:800;
+            font-size:14px;
+            white-space:nowrap;
+            overflow:hidden;
+            text-overflow:ellipsis;
+        }
+        .chanMeta{
+            margin:4px 0 0;
+            color:var(--muted);
+            font-size:12px;
+            white-space:nowrap;
+            overflow:hidden;
+            text-overflow:ellipsis;
+        }
+        .placeholderView{
+            height:100%;
+            display:flex;
+            align-items:center;
+            justify-content:center;
+            padding:24px;
+        }
+        .placeholderCard{
+            width:min(720px, 100%);
+            border-radius:28px;
+            background:rgba(0,0,0,.22);
+            border:1px solid rgba(255,255,255,.12);
+            backdrop-filter:blur(14px);
+            padding:18px;
+            display:flex;
+            align-items:center;
+            gap:16px;
+        }
+        .placeholderIcon{
+            width:62px;
+            height:62px;
+            border-radius:22px;
+            background:linear-gradient(135deg, rgba(74,214,255,.95), rgba(156,90,255,.85));
+            display:grid;
+            place-items:center;
+            font-size:28px;
+            flex:0 0 auto;
+        }
+        .placeholderText{min-width:0}
+        .placeholderTitle{
+            margin:0;
+            font-weight:800;
+            font-size:18px;
+            white-space:nowrap;
+            overflow:hidden;
+            text-overflow:ellipsis;
+        }
+        .placeholderSub{
+            margin:6px 0 0;
+            color:var(--muted);
+            font-size:13px;
+            line-height:1.4;
+        }
+        .launcher{
+            position:absolute;
+            left:50%;
+            bottom:22px;
+            transform:translateX(-50%);
+            width:min(1060px, 94vw);
+            height:106px;
+            border-radius:32px;
+            background:rgba(0,0,0,.30);
+            border:1px solid rgba(255,255,255,.12);
+            backdrop-filter:blur(18px);
+            box-shadow:0 14px 60px rgba(0,0,0,.55);
+            display:flex;
+            align-items:center;
+            gap:12px;
+            padding:12px 14px;
+            overflow:auto;
+            z-index:8;
+            scroll-behavior:smooth;
+        }
+        .launcher::-webkit-scrollbar{height:8px}
+        .launcher::-webkit-scrollbar-thumb{background:rgba(255,255,255,.12); border-radius:999px}
+        .appIcon{
+            width:82px;
+            height:82px;
+            border-radius:26px;
+            border:1px solid rgba(255,255,255,.14);
+            background:linear-gradient(180deg, rgba(255,255,255,.10), rgba(255,255,255,.05));
+            display:flex;
+            flex-direction:column;
+            align-items:center;
+            justify-content:center;
+            gap:6px;
+            cursor:pointer;
+            outline:none;
+            user-select:none;
+            flex:0 0 auto;
+            transition: transform .12s ease, border-color .12s ease, background .12s ease, box-shadow .12s ease;
+        }
+        .appIcon:focus{
+            box-shadow:var(--focus);
+            border-color:rgba(74,214,255,.60);
+            transform: translateY(-3px) scale(1.06);
+        }
+        .appGlyph{
+            width:46px;
+            height:46px;
+            border-radius:18px;
+            display:grid;
+            place-items:center;
+            font-size:22px;
+            color:#061019;
+            background:linear-gradient(135deg, rgba(74,214,255,.95), rgba(156,90,255,.85));
+        }
+        .appLabel{
+            font-size:12px;
+            font-weight:600;
+            color:rgba(255,255,255,.86);
+            max-width:76px;
+            white-space:nowrap;
+            overflow:hidden;
+            text-overflow:ellipsis;
+        }
+        .toast{
+            bottom:142px;
+            z-index:10;
+        }
+        .modal{z-index:20}
+        @media (max-width: 980px){
+            .stageWebos{position:relative; inset:auto; padding:14px 14px 140px}
+            .appCard{height:auto; min-height:520px}
+            .liveView{grid-template-columns:1fr; grid-template-rows: 280px 1fr}
+            .playerWrap{border-right:none; border-bottom:1px solid rgba(255,255,255,.10)}
+        }
     </style>
 </head>
 <body>
-    <div class="shell" data-base="<?= htmlspecialchars($base, ENT_QUOTES, 'UTF-8') ?>" data-pin-enabled="<?= $pinEnabled ? '1' : '0' ?>">
-        <div class="topbar">
-            <div class="brand">
-                <div class="logo" aria-hidden="true"></div>
-                <div class="titlewrap">
-                    <p class="title"><?= htmlspecialchars($appName, ENT_QUOTES, 'UTF-8') ?></p>
-                    <p class="subtitle">Arrow keys to navigate · Enter to open · Backspace to stop</p>
+    <div class="webos" data-base="<?= htmlspecialchars($base, ENT_QUOTES, 'UTF-8') ?>" data-pin-enabled="<?= $pinEnabled ? '1' : '0' ?>" data-focus="launcher">
+        <div class="webosBg" aria-hidden="true"></div>
+
+        <div class="statusbar">
+            <div class="statusLeft">
+                <div class="brandMark" aria-hidden="true"></div>
+                <div class="statusText">
+                    <p class="statusTitle"><?= htmlspecialchars($appName, ENT_QUOTES, 'UTF-8') ?></p>
+                    <p class="statusSub">Left/Right: launcher · Up: open · Enter: select · Backspace: stop</p>
                 </div>
             </div>
-            <div class="status">
-                <div class="pill" id="netStatus">Offline</div>
-                <div class="pill" id="clock">--:--</div>
+            <div class="statusRight">
+                <div class="chip" id="authPill">Guest</div>
+                <div class="chip" id="netStatus">Offline</div>
+                <div class="chip" id="clock">--:--</div>
             </div>
         </div>
 
-        <div class="main">
-            <div class="panel" role="region" aria-label="Apps">
-                <div class="panelHeader">
-                    <h2>Home</h2>
-                    <div class="pill" id="authPill">Guest</div>
+        <div class="stageWebos">
+            <div class="appCard" id="appCard" role="region" aria-label="App card">
+                <div class="appCardHeader">
+                    <div class="appCardTitleWrap">
+                        <p class="appCardTitle" id="cardTitle">Home</p>
+                        <p class="appCardSub" id="cardSub">Launcher</p>
+                    </div>
+                    <div class="chip" id="cardHint">Live TV</div>
                 </div>
-                <div class="grid" id="tiles" role="list"></div>
-            </div>
 
-            <div class="panel" role="region" aria-label="Player and Channels">
-                <div class="panelHeader">
-                    <h2 id="rightTitle">Live TV</h2>
-                    <div class="pill" id="rightPill">Channels</div>
-                </div>
-                <div class="rightBody">
-                    <div class="player">
-                        <video id="video" playsinline controls></video>
-                        <div class="playerOverlay">
-                            <div class="nowPlaying">
-                                <p class="nowPlayingTitle" id="nowTitle">Nothing playing</p>
-                                <p class="nowPlayingSub" id="nowSub">Select a channel</p>
+                <div class="appCardBody" id="cardBody">
+                    <div class="liveView" id="liveView">
+                        <div class="playerWrap">
+                            <video id="video" playsinline controls></video>
+                            <div class="playerOverlay">
+                                <div class="nowPlaying">
+                                    <p class="nowPlayingTitle" id="nowTitle">Nothing playing</p>
+                                    <p class="nowPlayingSub" id="nowSub">Select a channel</p>
+                                </div>
+                                <div class="hint">Enter: play · Backspace: stop · Down: launcher</div>
                             </div>
-                            <div class="hint">Enter: play · Backspace: stop</div>
+                        </div>
+                        <div class="channelPane">
+                            <div class="channelHeader">
+                                <div class="chip">Channels</div>
+                                <div class="chip" id="channelCount">0</div>
+                            </div>
+                            <div class="channelList" id="list" role="list"></div>
                         </div>
                     </div>
-                    <div class="list" id="list" role="list"></div>
+
+                    <div class="placeholderView" id="placeholderView" style="display:none;">
+                        <div class="placeholderCard">
+                            <div class="placeholderIcon" id="phIcon" aria-hidden="true">🧩</div>
+                            <div class="placeholderText">
+                                <p class="placeholderTitle" id="phTitle">Apps</p>
+                                <p class="placeholderSub" id="phSub">This is a simple webOS-style UI shell. Live TV plays HLS/MP4 streams.</p>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
+
+        <div class="launcher" id="launcher" role="list" aria-label="Launcher"></div>
     </div>
 
     <div class="toast" id="toast" role="status" aria-live="polite"></div>
@@ -624,14 +1019,12 @@ $pinEnabled = env('TVOS_PIN', '') !== '';
     </div>
 
     <script>
-        const shell = document.querySelector('.shell');
+        const shell = document.querySelector('.webos');
         const base = shell?.dataset?.base ?? '';
         const pinEnabled = (shell?.dataset?.pinEnabled ?? '0') === '1';
 
-        const tilesEl = document.getElementById('tiles');
+        const launcherEl = document.getElementById('launcher');
         const listEl = document.getElementById('list');
-        const rightTitleEl = document.getElementById('rightTitle');
-        const rightPillEl = document.getElementById('rightPill');
         const authPillEl = document.getElementById('authPill');
         const netStatusEl = document.getElementById('netStatus');
         const clockEl = document.getElementById('clock');
@@ -639,6 +1032,16 @@ $pinEnabled = env('TVOS_PIN', '') !== '';
         const videoEl = document.getElementById('video');
         const nowTitleEl = document.getElementById('nowTitle');
         const nowSubEl = document.getElementById('nowSub');
+        const channelCountEl = document.getElementById('channelCount');
+
+        const cardTitleEl = document.getElementById('cardTitle');
+        const cardSubEl = document.getElementById('cardSub');
+        const cardHintEl = document.getElementById('cardHint');
+        const liveViewEl = document.getElementById('liveView');
+        const placeholderViewEl = document.getElementById('placeholderView');
+        const phIconEl = document.getElementById('phIcon');
+        const phTitleEl = document.getElementById('phTitle');
+        const phSubEl = document.getElementById('phSub');
 
         const loginModalEl = document.getElementById('loginModal');
         const pinInputEl = document.getElementById('pinInput');
@@ -648,9 +1051,10 @@ $pinEnabled = env('TVOS_PIN', '') !== '';
         const state = {
             apps: [],
             channels: [],
-            focusMode: 'tiles',
-            tileIndex: 0,
-            listIndex: 0,
+            focusMode: 'launcher',
+            appIndex: 0,
+            channelIndex: 0,
+            activeRoute: 'live',
             playing: null,
             hls: null,
             authed: false,
@@ -687,106 +1091,152 @@ $pinEnabled = env('TVOS_PIN', '') !== '';
             return data.data;
         }
 
-        function renderTiles() {
-            tilesEl.innerHTML = '';
-            state.apps.forEach((app, idx) => {
-                const tile = document.createElement('div');
-                tile.className = 'tile';
-                tile.tabIndex = 0;
-                tile.setAttribute('role', 'listitem');
-                tile.dataset.index = String(idx);
-                tile.innerHTML = `
-                    <div class="icon" aria-hidden="true">${app.icon}</div>
-                    <div class="label">${escapeHtml(app.title)}</div>
-                    <div class="desc">${escapeHtml(app.route === 'live' ? 'Pick a channel and play HLS/MP4' : app.route === 'settings' ? 'Session and playback options' : 'Demo screen')}</div>
-                `;
-                tile.addEventListener('click', () => activateTile(idx));
-                tile.addEventListener('focus', () => {
-                    state.focusMode = 'tiles';
-                    state.tileIndex = idx;
-                });
-                tilesEl.appendChild(tile);
-            });
-            focusTile(state.tileIndex);
+        function escapeHtml(s) {
+            return String(s)
+                .replaceAll('&', '&amp;')
+                .replaceAll('<', '&lt;')
+                .replaceAll('>', '&gt;')
+                .replaceAll('"', '&quot;')
+                .replaceAll("'", '&#039;');
         }
 
-        function renderList() {
+        function escapeAttr(s) {
+            return escapeHtml(s).replaceAll('`', '&#096;');
+        }
+
+        function setFocusMode(mode) {
+            state.focusMode = mode;
+            shell.dataset.focus = mode;
+        }
+
+        function focusLauncher(idx) {
+            const el = launcherEl.querySelector(`.appIcon[data-index="${idx}"]`);
+            if (el) el.focus();
+        }
+
+        function focusChannel(idx) {
+            const el = listEl.querySelector(`.chanItem[data-index="${idx}"]`);
+            if (el) el.focus();
+        }
+
+        function appColor(app) {
+            const route = app?.route ?? '';
+            if (route === 'live') return 'linear-gradient(135deg, rgba(74,214,255,.95), rgba(22,240,180,.70))';
+            if (route === 'movies') return 'linear-gradient(135deg, rgba(255,196,76,.95), rgba(255,94,164,.80))';
+            if (route === 'apps') return 'linear-gradient(135deg, rgba(156,90,255,.90), rgba(74,214,255,.75))';
+            if (route === 'settings') return 'linear-gradient(135deg, rgba(255,255,255,.80), rgba(74,214,255,.65))';
+            return 'linear-gradient(135deg, rgba(74,214,255,.95), rgba(156,90,255,.85))';
+        }
+
+        function renderLauncher() {
+            launcherEl.innerHTML = '';
+            state.apps.forEach((app, idx) => {
+                const item = document.createElement('div');
+                item.className = 'appIcon';
+                item.tabIndex = 0;
+                item.setAttribute('role', 'listitem');
+                item.dataset.index = String(idx);
+                item.innerHTML = `
+                    <div class="appGlyph" style="background:${escapeAttr(appColor(app))}" aria-hidden="true">${escapeHtml(app.icon ?? '⬚')}</div>
+                    <div class="appLabel">${escapeHtml(app.title ?? 'App')}</div>
+                `;
+                item.addEventListener('click', () => {
+                    state.appIndex = idx;
+                    openAppFromLauncher(true);
+                });
+                item.addEventListener('focus', () => {
+                    setFocusMode('launcher');
+                    state.appIndex = idx;
+                    syncActiveApp();
+                });
+                launcherEl.appendChild(item);
+            });
+            focusLauncher(state.appIndex);
+        }
+
+        function renderChannels() {
             listEl.innerHTML = '';
+            channelCountEl.textContent = String(state.channels.length);
+
             if (state.channels.length === 0) {
                 const empty = document.createElement('div');
-                empty.className = 'listItem';
+                empty.className = 'chanItem';
                 empty.tabIndex = 0;
                 empty.innerHTML = `
-                    <div class="avatar" aria-hidden="true">⛔</div>
-                    <div class="liText">
-                        <p class="liName">No channels</p>
-                        <p class="liMeta">Configure DB or add demo streams</p>
+                    <div class="chanAvatar" aria-hidden="true">⛔</div>
+                    <div class="chanText">
+                        <p class="chanName">No channels</p>
+                        <p class="chanMeta">Configure MySQL or use demo streams</p>
                     </div>
                 `;
                 listEl.appendChild(empty);
                 return;
             }
+
             state.channels.forEach((ch, idx) => {
                 const item = document.createElement('div');
-                item.className = 'listItem';
+                item.className = 'chanItem';
                 item.tabIndex = 0;
                 item.setAttribute('role', 'listitem');
                 item.dataset.index = String(idx);
-                const avatar = ch.logoUrl
-                    ? `<img alt="" src="${escapeAttr(ch.logoUrl)}" />`
-                    : `📡`;
+                const avatar = ch.logoUrl ? `<img alt="" src="${escapeAttr(ch.logoUrl)}" />` : `📡`;
                 item.innerHTML = `
-                    <div class="avatar" aria-hidden="true">${avatar}</div>
-                    <div class="liText">
-                        <p class="liName">${escapeHtml(ch.name)}</p>
-                        <p class="liMeta">${escapeHtml(ch.streamUrl)}</p>
+                    <div class="chanAvatar" aria-hidden="true">${avatar}</div>
+                    <div class="chanText">
+                        <p class="chanName">${escapeHtml(ch.name)}</p>
+                        <p class="chanMeta">${escapeHtml(ch.streamUrl)}</p>
                     </div>
                 `;
                 item.addEventListener('click', () => playChannel(idx));
                 item.addEventListener('focus', () => {
-                    state.focusMode = 'list';
-                    state.listIndex = idx;
+                    setFocusMode('channels');
+                    state.channelIndex = idx;
                 });
                 listEl.appendChild(item);
             });
-            focusList(state.listIndex);
         }
 
-        function focusTile(idx) {
-            const tile = tilesEl.querySelector(`.tile[data-index="${idx}"]`);
-            if (tile) tile.focus();
-        }
+        function syncActiveApp() {
+            const app = state.apps[state.appIndex];
+            const title = app?.title ?? 'Home';
+            const route = app?.route ?? 'apps';
+            state.activeRoute = route;
 
-        function focusList(idx) {
-            const item = listEl.querySelector(`.listItem[data-index="${idx}"]`);
-            if (item) item.focus();
-        }
+            cardTitleEl.textContent = title;
+            cardHintEl.textContent = route === 'live' ? 'Live TV' : route === 'settings' ? 'Settings' : 'App';
 
-        function activateTile(idx) {
-            const app = state.apps[idx];
-            if (!app) return;
-            state.tileIndex = idx;
-            if (app.route === 'live') {
-                rightTitleEl.textContent = 'Live TV';
-                rightPillEl.textContent = 'Channels';
-                state.focusMode = 'list';
-                focusList(state.listIndex);
-                showToast('Live TV: select a channel to play');
+            if (route === 'live') {
+                cardSubEl.textContent = 'Up/Enter: channels · Down: launcher';
+                liveViewEl.style.display = 'grid';
+                placeholderViewEl.style.display = 'none';
                 return;
             }
-            if (app.route === 'settings') {
-                rightTitleEl.textContent = 'Settings';
-                rightPillEl.textContent = 'Session';
-                state.focusMode = 'tiles';
-                focusTile(state.tileIndex);
-                showToast('Settings: Esc to log out (PIN mode)');
+
+            if (state.playing) stopPlayback();
+
+            liveViewEl.style.display = 'none';
+            placeholderViewEl.style.display = 'flex';
+            phIconEl.textContent = app?.icon ?? '🧩';
+            phTitleEl.textContent = title;
+
+            if (route === 'settings') {
+                phSubEl.textContent = pinEnabled ? 'Press Esc to log out. Backspace stops playback.' : 'PIN lock is disabled. Set TVOS_PIN to enable.';
                 return;
             }
-            rightTitleEl.textContent = app.title;
-            rightPillEl.textContent = 'Demo';
-            state.focusMode = 'tiles';
-            focusTile(state.tileIndex);
-            showToast(`${app.title}: demo screen`);
+            phSubEl.textContent = 'Demo screen. Live TV plays streams from /api/channels (MySQL-backed if configured).';
+        }
+
+        function openAppFromLauncher(moveFocus) {
+            syncActiveApp();
+            if (state.activeRoute === 'live' && moveFocus) {
+                setFocusMode('channels');
+                focusChannel(state.channelIndex);
+                return;
+            }
+            if (moveFocus) {
+                setFocusMode('launcher');
+                focusLauncher(state.appIndex);
+            }
         }
 
         function stopPlayback() {
@@ -823,9 +1273,7 @@ $pinEnabled = env('TVOS_PIN', '') !== '';
                         videoEl.play().catch(() => {});
                     });
                     state.hls.on(window.Hls.Events.ERROR, (_evt, data) => {
-                        if (data?.fatal) {
-                            showToast('Playback error: stream not supported', 3200);
-                        }
+                        if (data?.fatal) showToast('Playback error: stream not supported', 3200);
                     });
                     return;
                 }
@@ -839,24 +1287,11 @@ $pinEnabled = env('TVOS_PIN', '') !== '';
         function playChannel(idx) {
             const ch = state.channels[idx];
             if (!ch) return;
-            state.listIndex = idx;
+            state.channelIndex = idx;
             state.playing = ch;
             nowTitleEl.textContent = ch.name;
             nowSubEl.textContent = ch.streamUrl;
             playUrl(ch.streamUrl);
-        }
-
-        function escapeHtml(s) {
-            return String(s)
-                .replaceAll('&', '&amp;')
-                .replaceAll('<', '&lt;')
-                .replaceAll('>', '&gt;')
-                .replaceAll('"', '&quot;')
-                .replaceAll("'", '&#039;');
-        }
-
-        function escapeAttr(s) {
-            return escapeHtml(s).replaceAll('`', '&#096;');
         }
 
         function updateClock() {
@@ -911,18 +1346,17 @@ $pinEnabled = env('TVOS_PIN', '') !== '';
         async function loadData() {
             state.apps = (await apiFetch('/api/apps')).apps ?? [];
             state.channels = (await apiFetch('/api/channels')).channels ?? [];
-            renderTiles();
-            renderList();
+            const liveIdx = state.apps.findIndex((a) => a?.route === 'live');
+            state.appIndex = liveIdx >= 0 ? liveIdx : 0;
+            renderLauncher();
+            renderChannels();
+            syncActiveApp();
         }
 
         document.addEventListener('keydown', (e) => {
             if (loginModalEl.style.display === 'flex') {
-                if (e.key === 'Enter') {
-                    pinBtnEl.click();
-                }
-                if (e.key === 'Escape') {
-                    pinInputEl.value = '';
-                }
+                if (e.key === 'Enter') pinBtnEl.click();
+                if (e.key === 'Escape') pinInputEl.value = '';
                 return;
             }
 
@@ -932,49 +1366,63 @@ $pinEnabled = env('TVOS_PIN', '') !== '';
                 showToast('Stopped');
                 return;
             }
+
             if (e.key === 'Escape') {
-                if (pinEnabled) logout();
-                return;
-            }
-            if (e.key === 'Enter') {
-                if (state.focusMode === 'tiles') {
-                    activateTile(state.tileIndex);
-                } else {
-                    playChannel(state.listIndex);
+                if (pinEnabled) {
+                    logout();
+                    return;
+                }
+                if (state.focusMode === 'channels') {
+                    setFocusMode('launcher');
+                    focusLauncher(state.appIndex);
                 }
                 return;
             }
+
+            if (e.key === 'Enter') {
+                if (state.focusMode === 'launcher') {
+                    openAppFromLauncher(true);
+                    return;
+                }
+                if (state.focusMode === 'channels') {
+                    playChannel(state.channelIndex);
+                }
+                return;
+            }
+
             if (!['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'].includes(e.key)) return;
             e.preventDefault();
 
-            if (state.focusMode === 'tiles') {
-                const cols = 2;
-                const max = state.apps.length - 1;
-                let next = state.tileIndex;
+            if (state.focusMode === 'launcher') {
+                const max = Math.max(0, state.apps.length - 1);
+                let next = state.appIndex;
                 if (e.key === 'ArrowRight') next = Math.min(max, next + 1);
                 if (e.key === 'ArrowLeft') next = Math.max(0, next - 1);
-                if (e.key === 'ArrowDown') next = Math.min(max, next + cols);
-                if (e.key === 'ArrowUp') next = Math.max(0, next - cols);
-                state.tileIndex = next;
-                focusTile(next);
+                if (e.key === 'ArrowUp') {
+                    openAppFromLauncher(true);
+                    return;
+                }
+                state.appIndex = next;
+                syncActiveApp();
+                focusLauncher(next);
+                launcherEl.querySelector(`.appIcon[data-index="${next}"]`)?.scrollIntoView({ block: 'nearest', inline: 'nearest' });
                 return;
             }
 
-            if (state.focusMode === 'list') {
+            if (state.focusMode === 'channels') {
+                if (state.activeRoute !== 'live') return;
                 const max = Math.max(0, state.channels.length - 1);
-                let next = state.listIndex;
+                let next = state.channelIndex;
                 if (e.key === 'ArrowDown') next = Math.min(max, next + 1);
                 if (e.key === 'ArrowUp') next = Math.max(0, next - 1);
                 if (e.key === 'ArrowLeft') {
-                    state.focusMode = 'tiles';
-                    focusTile(state.tileIndex);
+                    setFocusMode('launcher');
+                    focusLauncher(state.appIndex);
                     return;
                 }
-                if (e.key === 'ArrowRight') {
-                    return;
-                }
-                state.listIndex = next;
-                focusList(next);
+                if (e.key === 'ArrowRight') return;
+                state.channelIndex = next;
+                focusChannel(next);
             }
         });
 
@@ -988,9 +1436,7 @@ $pinEnabled = env('TVOS_PIN', '') !== '';
         });
 
         pinInputEl.addEventListener('keydown', (e) => {
-            if (e.key === 'Enter') {
-                pinBtnEl.click();
-            }
+            if (e.key === 'Enter') pinBtnEl.click();
         });
 
         async function boot() {
