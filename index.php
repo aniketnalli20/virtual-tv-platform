@@ -1295,6 +1295,10 @@ $pinEnabled = env('TVOS_PIN', '') !== '';
                             <input type="text" id="appUrlInput" placeholder="Open URL (https://...)" inputmode="url" autocomplete="url" />
                             <button class="primary" id="appUrlBtn">Open</button>
                         </div>
+                        <div class="row" style="margin-top:12px;">
+                            <input type="text" id="googleQueryInput" placeholder="Google Search" autocomplete="off" />
+                            <button class="primary" id="googleSearchBtn">Search</button>
+                        </div>
                         <div class="appsGrid" id="appsGrid" role="list" style="margin-top:14px;"></div>
                     </div>
 
@@ -1366,6 +1370,8 @@ $pinEnabled = env('TVOS_PIN', '') !== '';
         const appsGridEl = document.getElementById('appsGrid');
         const appUrlInputEl = document.getElementById('appUrlInput');
         const appUrlBtnEl = document.getElementById('appUrlBtn');
+        const googleQueryInputEl = document.getElementById('googleQueryInput');
+        const googleSearchBtnEl = document.getElementById('googleSearchBtn');
 
         const settingsViewEl = document.getElementById('settingsView');
         const settingsListEl = document.getElementById('settingsList');
@@ -1404,6 +1410,11 @@ $pinEnabled = env('TVOS_PIN', '') !== '';
         const LAST_PLAY_KEY = 'tvos_last_play_v1';
         const FEATURED_APPS = [
             { id: 'open-url', title: 'Open URL', sub: 'Launch any website', iconName: 'public', action: 'openUrl' },
+            { id: 'google-search', title: 'Google Search', sub: 'Search the web', iconName: 'search', action: 'googleSearch' },
+            { id: 'youtube', title: 'YouTube', sub: 'Video platform', iconName: 'smart_display', url: 'https://www.youtube.com/' },
+            { id: 'gmail', title: 'Gmail', sub: 'Email', iconName: 'mail', url: 'https://mail.google.com/' },
+            { id: 'drive', title: 'Google Drive', sub: 'Cloud storage', iconName: 'cloud', url: 'https://drive.google.com/' },
+            { id: 'maps', title: 'Google Maps', sub: 'Maps', iconName: 'map', url: 'https://maps.google.com/' },
             { id: 'wikipedia', title: 'Wikipedia', sub: 'Free encyclopedia', iconName: 'language', url: 'https://www.wikipedia.org/' },
             { id: 'openstreetmap', title: 'OpenStreetMap', sub: 'Free world map', iconName: 'map', url: 'https://www.openstreetmap.org/' },
             { id: 'archive', title: 'Internet Archive', sub: 'Free library of media', iconName: 'inventory_2', url: 'https://archive.org/' },
@@ -1719,12 +1730,27 @@ $pinEnabled = env('TVOS_PIN', '') !== '';
             window.open(finalUrl, '_blank', 'noopener,noreferrer');
         }
 
+        function openGoogleSearch(query) {
+            const q = String(query ?? '').trim();
+            if (q === '') {
+                openExternal('https://www.google.com/');
+                return;
+            }
+            const url = `https://www.google.com/search?q=${encodeURIComponent(q)}`;
+            openExternal(url);
+        }
+
         function activateAppTile(idx) {
             const app = FEATURED_APPS[idx];
             if (!app) return;
             if (app.action === 'openUrl') {
                 appUrlInputEl.focus();
                 appUrlInputEl.select();
+                return;
+            }
+            if (app.action === 'googleSearch') {
+                googleQueryInputEl.focus();
+                googleQueryInputEl.select();
                 return;
             }
             if (app.url) openExternal(app.url);
