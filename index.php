@@ -293,7 +293,7 @@ if (str_starts_with($path, '/api/')) {
 }
 
 $base = base_path();
-$appName = env('TVOS_NAME', 'QwikStar');
+$appName = env('TVOS_NAME', 'Mango OS');
 $pinEnabled = env('TVOS_PIN', '') !== '';
 ?>
 <!doctype html>
@@ -1343,6 +1343,7 @@ $pinEnabled = env('TVOS_PIN', '') !== '';
             playing: null,
             hls: null,
             authed: false,
+            osId: null,
             settings: null,
             settingsItems: [],
         };
@@ -1680,6 +1681,10 @@ $pinEnabled = env('TVOS_PIN', '') !== '';
                 { type: 'toggle', title: 'Background playback', meta: 'Keep playing when switching apps', icon: 'headphones', key: 'backgroundPlayback' },
             ];
 
+            if (state.osId) {
+                items.push({ type: 'info', title: 'OS ID', meta: '', icon: 'badge', value: String(state.osId) });
+            }
+
             if (state.server) {
                 items.push(
                     { type: 'info', title: 'PIN lock', meta: '', icon: 'lock', value: state.server.pinEnabled ? 'Enabled' : 'Disabled' },
@@ -1899,6 +1904,42 @@ $pinEnabled = env('TVOS_PIN', '') !== '';
             }
         }
 
+        function restoreLastPlayback() {
+            const s = state.settings ?? loadSettings();
+            state.settings = s;
+            if (!s.rememberLast) return;
+            try {
+                const raw = localStorage.getItem(LAST_PLAY_KEY);
+                if (!raw) return;
+                const last = JSON.parse(raw);
+                if (!last || typeof last !== 'object') return;
+                if (last.type === 'channel') {
+                    const idx = state.channels.findIndex((c) => (c?.id ?? '') === (last.id ?? ''));
+                    if (idx >= 0) {
+                        const appIdx = state.apps.findIndex((a) => a?.route === 'live');
+                        if (appIdx >= 0) state.appIndex = appIdx;
+                        syncActiveApp();
+                        setFocusMode('channels');
+                        focusChannel(idx);
+                        playChannel(idx);
+                    }
+                    return;
+                }
+                if (last.type === 'movie') {
+                    const idx = state.movies.findIndex((m) => (m?.id ?? '') === (last.id ?? ''));
+                    if (idx >= 0) {
+                        const appIdx = state.apps.findIndex((a) => a?.route === 'movies');
+                        if (appIdx >= 0) state.appIndex = appIdx;
+                        syncActiveApp();
+                        setFocusMode('movies');
+                        focusMovie(idx);
+                        playMovie(idx);
+                    }
+                }
+            } catch {
+            }
+        }
+
         function playChannel(idx) {
             const ch = state.channels[idx];
             if (!ch) return;
@@ -1939,6 +1980,7 @@ $pinEnabled = env('TVOS_PIN', '') !== '';
 
         async function ensureAuth() {
             const me = await apiFetch('/api/me');
+            state.osId = me.osId ?? null;
             setAuthed(!!me.authenticated);
             if (!state.authed && pinEnabled) {
                 loginModalEl.style.display = 'flex';
@@ -1973,17 +2015,44 @@ $pinEnabled = env('TVOS_PIN', '') !== '';
         async function loadData() {
             state.apps = (await apiFetch('/api/apps')).apps ?? [];
             state.channels = (await apiFetch('/api/channels')).channels ?? [];
+            state.movies = (await apiFetch('/api/movies')).movies ?? [];
+            try {
+                state.server = await apiFetch('/api/server');
+            } catch {
+                state.server = null;
+            }
             const liveIdx = state.apps.findIndex((a) => a?.route === 'live');
             state.appIndex = liveIdx >= 0 ? liveIdx : 0;
+            state.settings = state.settings ?? loadSettings();
+            applySettings();
             renderLauncher();
             renderChannels();
+            renderMovies();
             syncActiveApp();
+            restoreLastPlayback();
         }
 
         document.addEventListener('keydown', (e) => {
             if (loginModalEl.style.display === 'flex') {
                 if (e.key === 'Enter') pinBtnEl.click();
                 if (e.key === 'Escape') pinInputEl.value = '';
+                return;
+            }
+
+            const activeEl = document.activeElement;
+            const activeTag = activeEl ? String(activeEl.tagName ?? '').toUpperCase() : '';
+            const isTyping = activeTag === 'INPUT' || activeTag === 'TEXTAREA' || activeEl?.isContentEditable === true;
+            if (isTyping) {
+                if (activeEl === appUrlInputEl && e.key === 'Enter') {
+                    openExternal(appUrlInputEl.value);
+                    return;
+                }
+                if (activeEl === appUrlInputEl && e.key === 'Escape') {
+                    appUrlInputEl.blur();
+                    setFocusMode('apps');
+                    focusAppTile(state.appsIndex);
+                    return;
+                }
                 return;
             }
 
@@ -1999,7 +2068,7 @@ $pinEnabled = env('TVOS_PIN', '') !== '';
                     logout();
                     return;
                 }
-                if (state.focusMode === 'channels') {
+                if (state.focusMode !== 'launcher') {
                     setFocusMode('launcher');
                     focusLauncher(state.appIndex);
                 }
@@ -2013,6 +2082,18 @@ $pinEnabled = env('TVOS_PIN', '') !== '';
                 }
                 if (state.focusMode === 'channels') {
                     playChannel(state.channelIndex);
+                    return;
+                }
+                if (state.focusMode === 'movies') {
+                    playMovie(state.movieIndex);
+                    return;
+                }
+                if (state.focusMode === 'apps') {
+                    activateAppTile(state.appsIndex);
+                    return;
+                }
+                if (state.focusMode === 'settings') {
+                    activateSetting(state.settingsIndex);
                 }
                 return;
             }
@@ -2050,6 +2131,62 @@ $pinEnabled = env('TVOS_PIN', '') !== '';
                 if (e.key === 'ArrowRight') return;
                 state.channelIndex = next;
                 focusChannel(next);
+                return;
+            }
+
+            if (state.focusMode === 'movies') {
+                if (state.activeRoute !== 'movies') return;
+                const max = Math.max(0, state.movies.length - 1);
+                let next = state.movieIndex;
+                if (e.key === 'ArrowDown') next = Math.min(max, next + 1);
+                if (e.key === 'ArrowUp') next = Math.max(0, next - 1);
+                if (e.key === 'ArrowLeft') {
+                    setFocusMode('launcher');
+                    focusLauncher(state.appIndex);
+                    return;
+                }
+                if (e.key === 'ArrowRight') return;
+                state.movieIndex = next;
+                focusMovie(next);
+                return;
+            }
+
+            if (state.focusMode === 'apps') {
+                if (state.activeRoute !== 'apps') return;
+                const cols = window.innerWidth <= 980 ? 2 : 3;
+                const max = Math.max(0, FEATURED_APPS.length - 1);
+                let next = state.appsIndex;
+                if (e.key === 'ArrowRight') next = Math.min(max, next + 1);
+                if (e.key === 'ArrowLeft') {
+                    const isFirstCol = (next % cols) === 0;
+                    if (isFirstCol) {
+                        setFocusMode('launcher');
+                        focusLauncher(state.appIndex);
+                        return;
+                    }
+                    next = Math.max(0, next - 1);
+                }
+                if (e.key === 'ArrowDown') next = Math.min(max, next + cols);
+                if (e.key === 'ArrowUp') next = Math.max(0, next - cols);
+                state.appsIndex = next;
+                focusAppTile(next);
+                return;
+            }
+
+            if (state.focusMode === 'settings') {
+                if (state.activeRoute !== 'settings') return;
+                const max = Math.max(0, state.settingsItems.length - 1);
+                let next = state.settingsIndex;
+                if (e.key === 'ArrowDown') next = Math.min(max, next + 1);
+                if (e.key === 'ArrowUp') next = Math.max(0, next - 1);
+                if (e.key === 'ArrowLeft') {
+                    setFocusMode('launcher');
+                    focusLauncher(state.appIndex);
+                    return;
+                }
+                if (e.key === 'ArrowRight') return;
+                state.settingsIndex = next;
+                focusSetting(next);
             }
         });
 
