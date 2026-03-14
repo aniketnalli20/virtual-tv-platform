@@ -2191,6 +2191,10 @@ $pinEnabled = env('TVOS_PIN', '') !== '';
             }
         });
 
+        appUrlBtnEl.addEventListener('click', () => {
+            openExternal(appUrlInputEl.value);
+        });
+
         pinBtnEl.addEventListener('click', async () => {
             const pin = (pinInputEl.value ?? '').trim();
             try {
@@ -2205,6 +2209,8 @@ $pinEnabled = env('TVOS_PIN', '') !== '';
         });
 
         async function boot() {
+            state.settings = loadSettings();
+            applySettings();
             updateClock();
             updateNetworkStatus();
             window.setInterval(updateClock, 1000);

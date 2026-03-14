@@ -1,6 +1,6 @@
-# Virtual TV Platform (WebOS-style UI)
+# QwikStar Platform (Mango OS UI)
 
-Simple PHP 8 webapp that mimics an LG webOS-style launcher and “app card” experience, with a Live TV player (HLS/MP4) and JSON REST endpoints.
+Simple PHP 8 webapp that mimics an LG webOS-style launcher and “app card” experience. QwikStar is the platform shell, and Mango OS is the currently available OS UI. Includes Live TV + Movies playback (HLS/MP4) and JSON REST endpoints.
 
 ## Requirements
 
@@ -40,7 +40,8 @@ Open:
 
 All configuration is via environment variables (no hard-coded secrets).
 
-- `TVOS_NAME` (optional): display name (default: `QwikStar`)
+- `PLATFORM_NAME` (optional): platform display name (default: `QwikStar`)
+- `TVOS_NAME` (optional): OS display name (default: `Mango OS`)
 - `TVOS_PIN` (optional): if set (non-empty), enables PIN lock and requires login for `/api/apps` and `/api/channels`
 - `TVOS_SESSION_PATH` (optional): session storage directory (useful if PHP cannot write to the default temp path)
 
@@ -90,9 +91,14 @@ Endpoints:
 - `POST /api/logout`
 - `GET /api/apps`
 - `GET /api/channels`
+- `GET /api/movies`
+- `GET /api/server`
+
+## OS ID
+
+Each user gets a unique OS ID stored in a cookie (`mango_os_id`) and also available via `GET /api/me` as `data.osId`.
 
 ## Playback Notes
 
 - HLS playback uses open-source `hls.js` in browsers that do not natively support `.m3u8`.
 - MP4 playback uses the browser’s native video support.
-
