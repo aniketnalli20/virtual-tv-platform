@@ -40,7 +40,7 @@ Open:
 
 All configuration is via environment variables (no hard-coded secrets).
 
-- `TVOS_NAME` (optional): display name (default: `Virtual TV OS`)
+- `TVOS_NAME` (optional): display name (default: `QwikStar`)
 - `TVOS_PIN` (optional): if set (non-empty), enables PIN lock and requires login for `/api/apps` and `/api/channels`
 - `TVOS_SESSION_PATH` (optional): session storage directory (useful if PHP cannot write to the default temp path)
 

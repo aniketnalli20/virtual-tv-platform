@@ -271,7 +271,7 @@ if (str_starts_with($path, '/api/')) {
 }
 
 $base = base_path();
-$appName = env('TVOS_NAME', 'Virtual TV OS');
+$appName = env('TVOS_NAME', 'QwikStar');
 $pinEnabled = env('TVOS_PIN', '') !== '';
 ?>
 <!doctype html>
@@ -1265,20 +1265,37 @@ $pinEnabled = env('TVOS_PIN', '') !== '';
         const pinEnabled = (shell?.dataset?.pinEnabled ?? '0') === '1';
 
         const launcherEl = document.getElementById('launcher');
-        const listEl = document.getElementById('list');
         const authPillEl = document.getElementById('authPill');
         const netStatusEl = document.getElementById('netStatus');
         const clockEl = document.getElementById('clock');
         const toastEl = document.getElementById('toast');
-        const videoEl = document.getElementById('video');
-        const nowTitleEl = document.getElementById('nowTitle');
-        const nowSubEl = document.getElementById('nowSub');
-        const channelCountEl = document.getElementById('channelCount');
 
         const cardTitleEl = document.getElementById('cardTitle');
         const cardSubEl = document.getElementById('cardSub');
         const cardHintEl = document.getElementById('cardHint');
+
         const liveViewEl = document.getElementById('liveView');
+        const listEl = document.getElementById('list');
+        const channelCountEl = document.getElementById('channelCount');
+        const videoEl = document.getElementById('video');
+        const nowTitleEl = document.getElementById('nowTitle');
+        const nowSubEl = document.getElementById('nowSub');
+
+        const moviesViewEl = document.getElementById('moviesView');
+        const moviesListEl = document.getElementById('moviesList');
+        const movieCountEl = document.getElementById('movieCount');
+        const movieVideoEl = document.getElementById('movieVideo');
+        const movieNowTitleEl = document.getElementById('movieNowTitle');
+        const movieNowSubEl = document.getElementById('movieNowSub');
+
+        const appsViewEl = document.getElementById('appsView');
+        const appsGridEl = document.getElementById('appsGrid');
+        const appUrlInputEl = document.getElementById('appUrlInput');
+        const appUrlBtnEl = document.getElementById('appUrlBtn');
+
+        const settingsViewEl = document.getElementById('settingsView');
+        const settingsListEl = document.getElementById('settingsList');
+
         const placeholderViewEl = document.getElementById('placeholderView');
         const phIconEl = document.getElementById('phIcon');
         const phTitleEl = document.getElementById('phTitle');
@@ -1292,13 +1309,20 @@ $pinEnabled = env('TVOS_PIN', '') !== '';
         const state = {
             apps: [],
             channels: [],
+            movies: [],
+            server: null,
             focusMode: 'launcher',
             appIndex: 0,
             channelIndex: 0,
+            movieIndex: 0,
+            appsIndex: 0,
+            settingsIndex: 0,
             activeRoute: 'live',
             playing: null,
             hls: null,
             authed: false,
+            settings: null,
+            settingsItems: [],
         };
 
         function apiUrl(path) {
