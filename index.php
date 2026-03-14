@@ -995,6 +995,20 @@ $pinEnabled = env('TVOS_PIN', '') !== '';
             overflow:auto;
             padding:18px;
         }
+        .browserFrameWrap{
+            height: min(520px, calc(68vh - 140px));
+            border-radius:22px;
+            overflow:hidden;
+            border:1px solid rgba(255,255,255,.14);
+            background:rgba(0,0,0,.22);
+            box-shadow:0 18px 70px rgba(0,0,0,.50);
+        }
+        #browserFrame{
+            width:100%;
+            height:100%;
+            border:0;
+            background:#000;
+        }
         .sectionTitle{
             font-weight:800;
             font-size:18px;
@@ -1327,6 +1341,25 @@ $pinEnabled = env('TVOS_PIN', '') !== '';
                             <button class="primary" id="googleSearchBtn">Search</button>
                         </div>
                         <div class="appsGrid" id="appsGrid" role="list" style="margin-top:14px;"></div>
+                    </div>
+
+                    <div class="viewScroll" id="browserView" style="display:none;">
+                        <div class="sectionTitle">Browser</div>
+                        <div class="row" style="margin-top:12px;">
+                            <input type="text" id="browserUrlInput" placeholder="Enter URL" inputmode="url" autocomplete="url" />
+                            <button id="browserGoBtn" class="primary">Go</button>
+                        </div>
+                        <div class="row" style="margin-top:10px;">
+                            <button id="browserBackBtn">Back</button>
+                            <button id="browserForwardBtn">Forward</button>
+                            <button id="browserReloadBtn">Reload</button>
+                            <button id="browserOpenNewTabBtn">Open in new tab</button>
+                            <button id="browserCloseBtn">Close</button>
+                        </div>
+                        <div class="browserFrameWrap" style="margin-top:12px;">
+                            <iframe id="browserFrame" title="Browser" sandbox="allow-forms allow-scripts allow-same-origin allow-popups allow-downloads allow-popups-to-escape-sandbox"></iframe>
+                        </div>
+                        <div class="setMeta" id="browserHint" style="margin-top:10px;">If a site doesn’t load, it may block embedding. Use “Open in new tab”.</div>
                     </div>
 
                     <div class="viewScroll" id="settingsView" style="display:none;">
