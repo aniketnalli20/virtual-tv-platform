@@ -1325,6 +1325,15 @@ $pinEnabled = env('TVOS_PIN', '') !== '';
             settingsItems: [],
         };
 
+        const SETTINGS_KEY = 'tvos_settings_v1';
+        const LAST_PLAY_KEY = 'tvos_last_play_v1';
+        const FEATURED_APPS = [
+            { id: 'open-url', title: 'Open URL', sub: 'Launch any website', iconName: 'public', action: 'openUrl' },
+            { id: 'wikipedia', title: 'Wikipedia', sub: 'Free encyclopedia', iconName: 'language', url: 'https://www.wikipedia.org/' },
+            { id: 'openstreetmap', title: 'OpenStreetMap', sub: 'Free world map', iconName: 'map', url: 'https://www.openstreetmap.org/' },
+            { id: 'archive', title: 'Internet Archive', sub: 'Free library of media', iconName: 'inventory_2', url: 'https://archive.org/' },
+        ];
+
         function apiUrl(path) {
             return `${base}${path}`;
         }
@@ -1369,6 +1378,64 @@ $pinEnabled = env('TVOS_PIN', '') !== '';
             return escapeHtml(s).replaceAll('`', '&#096;');
         }
 
+        function materialIcon(name) {
+            return `<span class="material-symbols-rounded" aria-hidden="true">${escapeHtml(name)}</span>`;
+        }
+
+        function loadSettings() {
+            const fallback = {
+                autoplayOnHighlight: false,
+                rememberLast: true,
+                showVideoControls: true,
+                hlsLowLatency: true,
+                backgroundPlayback: false,
+            };
+            try {
+                const raw = localStorage.getItem(SETTINGS_KEY);
+                if (!raw) return fallback;
+                const parsed = JSON.parse(raw);
+                if (!parsed || typeof parsed !== 'object') return fallback;
+                return { ...fallback, ...parsed };
+            } catch {
+                return fallback;
+            }
+        }
+
+        function saveSettings(next) {
+            state.settings = next;
+            localStorage.setItem(SETTINGS_KEY, JSON.stringify(next));
+            applySettings();
+        }
+
+        function applySettings() {
+            const s = state.settings ?? loadSettings();
+            state.settings = s;
+            if (s.showVideoControls) {
+                videoEl.setAttribute('controls', '');
+                movieVideoEl.setAttribute('controls', '');
+            } else {
+                videoEl.removeAttribute('controls');
+                movieVideoEl.removeAttribute('controls');
+            }
+        }
+
+        function stopAllPlayback() {
+            if (state.hls) {
+                try { state.hls.destroy(); } catch {}
+                state.hls = null;
+            }
+            [videoEl, movieVideoEl].forEach((v) => {
+                try { v.pause(); } catch {}
+                v.removeAttribute('src');
+                try { v.load(); } catch {}
+            });
+            state.playing = null;
+            nowTitleEl.textContent = 'Nothing playing';
+            nowSubEl.textContent = 'Select a channel';
+            movieNowTitleEl.textContent = 'Nothing playing';
+            movieNowSubEl.textContent = 'Select a movie';
+        }
+
         function setFocusMode(mode) {
             state.focusMode = mode;
             shell.dataset.focus = mode;
@@ -1381,6 +1448,21 @@ $pinEnabled = env('TVOS_PIN', '') !== '';
 
         function focusChannel(idx) {
             const el = listEl.querySelector(`.chanItem[data-index="${idx}"]`);
+            if (el) el.focus();
+        }
+
+        function focusMovie(idx) {
+            const el = moviesListEl.querySelector(`.chanItem[data-index="${idx}"]`);
+            if (el) el.focus();
+        }
+
+        function focusAppTile(idx) {
+            const el = appsGridEl.querySelector(`.appTile[data-index="${idx}"]`);
+            if (el) el.focus();
+        }
+
+        function focusSetting(idx) {
+            const el = settingsListEl.querySelector(`.setItem[data-index="${idx}"]`);
             if (el) el.focus();
         }
 
@@ -1401,8 +1483,13 @@ $pinEnabled = env('TVOS_PIN', '') !== '';
                 item.tabIndex = 0;
                 item.setAttribute('role', 'listitem');
                 item.dataset.index = String(idx);
+
+                const iconHtml = app?.iconName
+                    ? `<span class="material-symbols-rounded" aria-hidden="true">${escapeHtml(app.iconName)}</span>`
+                    : escapeHtml(app.icon ?? '⬚');
+
                 item.innerHTML = `
-                    <div class="appGlyph" style="background:${escapeAttr(appColor(app))}" aria-hidden="true">${escapeHtml(app.icon ?? '⬚')}</div>
+                    <div class="appGlyph" style="background:${escapeAttr(appColor(app))}" aria-hidden="true">${iconHtml}</div>
                     <div class="appLabel">${escapeHtml(app.title ?? 'App')}</div>
                 `;
                 item.addEventListener('click', () => {
