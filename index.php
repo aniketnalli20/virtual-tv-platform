@@ -293,7 +293,7 @@ if (str_starts_with($path, '/api/')) {
 }
 
 $base = base_path();
-$platformName = env('PLATFORM_NAME', 'QwikStar');
+$platformName = 'QwikStar';
 $osName = env('TVOS_NAME', 'Mango OS');
 $pinEnabled = env('TVOS_PIN', '') !== '';
 ?>

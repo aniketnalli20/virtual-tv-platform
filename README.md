@@ -40,7 +40,6 @@ Open:
 
 All configuration is via environment variables (no hard-coded secrets).
 
-- `PLATFORM_NAME` (optional): platform display name (default: `QwikStar`)
 - `TVOS_NAME` (optional): OS display name (default: `Mango OS`)
 - `TVOS_PIN` (optional): if set (non-empty), enables PIN lock and requires login for `/api/apps` and `/api/channels`
 - `TVOS_SESSION_PATH` (optional): session storage directory (useful if PHP cannot write to the default temp path)
