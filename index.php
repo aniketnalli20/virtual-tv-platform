@@ -2133,8 +2133,18 @@ $pinEnabled = env('TVOS_PIN', '') !== '';
                     openExternal(appUrlInputEl.value);
                     return;
                 }
+                if (activeEl === googleQueryInputEl && e.key === 'Enter') {
+                    openGoogleSearch(googleQueryInputEl.value);
+                    return;
+                }
                 if (activeEl === appUrlInputEl && e.key === 'Escape') {
                     appUrlInputEl.blur();
+                    setFocusMode('apps');
+                    focusAppTile(state.appsIndex);
+                    return;
+                }
+                if (activeEl === googleQueryInputEl && e.key === 'Escape') {
+                    googleQueryInputEl.blur();
                     setFocusMode('apps');
                     focusAppTile(state.appsIndex);
                     return;
@@ -2278,6 +2288,10 @@ $pinEnabled = env('TVOS_PIN', '') !== '';
 
         appUrlBtnEl.addEventListener('click', () => {
             openExternal(appUrlInputEl.value);
+        });
+
+        googleSearchBtnEl.addEventListener('click', () => {
+            openGoogleSearch(googleQueryInputEl.value);
         });
 
         pinBtnEl.addEventListener('click', async () => {
