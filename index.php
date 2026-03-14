@@ -1509,6 +1509,8 @@ $pinEnabled = env('TVOS_PIN', '') !== '';
         function renderChannels() {
             listEl.innerHTML = '';
             channelCountEl.textContent = String(state.channels.length);
+            const s = state.settings ?? loadSettings();
+            state.settings = s;
 
             if (state.channels.length === 0) {
                 const empty = document.createElement('div');
@@ -1531,7 +1533,7 @@ $pinEnabled = env('TVOS_PIN', '') !== '';
                 item.tabIndex = 0;
                 item.setAttribute('role', 'listitem');
                 item.dataset.index = String(idx);
-                const avatar = ch.logoUrl ? `<img alt="" src="${escapeAttr(ch.logoUrl)}" />` : `📡`;
+                const avatar = ch.logoUrl ? `<img alt="" src="${escapeAttr(ch.logoUrl)}" />` : materialIcon('tv');
                 item.innerHTML = `
                     <div class="chanAvatar" aria-hidden="true">${avatar}</div>
                     <div class="chanText">
@@ -1543,6 +1545,7 @@ $pinEnabled = env('TVOS_PIN', '') !== '';
                 item.addEventListener('focus', () => {
                     setFocusMode('channels');
                     state.channelIndex = idx;
+                    if (s.autoplayOnHighlight) playChannel(idx);
                 });
                 listEl.appendChild(item);
             });
