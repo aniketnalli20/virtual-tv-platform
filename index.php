@@ -293,7 +293,8 @@ if (str_starts_with($path, '/api/')) {
 }
 
 $base = base_path();
-$appName = env('TVOS_NAME', 'Mango OS');
+$platformName = env('PLATFORM_NAME', 'QwikStar');
+$osName = env('TVOS_NAME', 'Mango OS');
 $pinEnabled = env('TVOS_PIN', '') !== '';
 ?>
 <!doctype html>
@@ -301,7 +302,7 @@ $pinEnabled = env('TVOS_PIN', '') !== '';
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title><?= htmlspecialchars($appName, ENT_QUOTES, 'UTF-8') ?></title>
+    <title><?= htmlspecialchars($platformName . ' · ' . $osName, ENT_QUOTES, 'UTF-8') ?></title>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet" />
@@ -1175,8 +1176,8 @@ $pinEnabled = env('TVOS_PIN', '') !== '';
             <div class="statusLeft">
                 <div class="brandMark" aria-hidden="true"></div>
                 <div class="statusText">
-                    <p class="statusTitle"><?= htmlspecialchars($appName, ENT_QUOTES, 'UTF-8') ?></p>
-                    <p class="statusSub">Left/Right: launcher · Up: open · Enter: select · Backspace: stop</p>
+                    <p class="statusTitle"><?= htmlspecialchars($platformName, ENT_QUOTES, 'UTF-8') ?></p>
+                    <p class="statusSub">OS: <?= htmlspecialchars($osName, ENT_QUOTES, 'UTF-8') ?> · Left/Right: launcher · Up: open · Enter: select</p>
                 </div>
             </div>
             <div class="statusRight">
