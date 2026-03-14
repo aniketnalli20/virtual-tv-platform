@@ -1,6 +1,14 @@
 <?php
 declare(strict_types=1);
 
+$sessionPath = getenv('TVOS_SESSION_PATH');
+if (!is_string($sessionPath) || $sessionPath === '') {
+    $sessionPath = sys_get_temp_dir();
+}
+if (!is_dir($sessionPath)) {
+    @mkdir($sessionPath, 0777, true);
+}
+@session_save_path($sessionPath);
 session_start();
 
 function env(string $key, ?string $default = null): ?string
@@ -57,6 +65,10 @@ function request_path(): string
 
 function is_authed(): bool
 {
+    $pinRequired = env('TVOS_PIN', '');
+    if ($pinRequired === '') {
+        return true;
+    }
     return ($_SESSION['tv_os_auth'] ?? false) === true;
 }
 
