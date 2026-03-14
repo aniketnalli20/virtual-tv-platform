@@ -143,10 +143,58 @@ function get_channels(): array
 function get_apps(): array
 {
     return [
-        ['id' => 'live', 'title' => 'Live TV', 'icon' => '📺', 'route' => 'live'],
-        ['id' => 'movies', 'title' => 'Movies', 'icon' => '🎬', 'route' => 'movies'],
-        ['id' => 'apps', 'title' => 'Apps', 'icon' => '🧩', 'route' => 'apps'],
-        ['id' => 'settings', 'title' => 'Settings', 'icon' => '⚙️', 'route' => 'settings'],
+        ['id' => 'live', 'title' => 'Live TV', 'icon' => '📺', 'iconName' => 'live_tv', 'route' => 'live'],
+        ['id' => 'movies', 'title' => 'Movies', 'icon' => '🎬', 'iconName' => 'movie', 'route' => 'movies'],
+        ['id' => 'apps', 'title' => 'Apps', 'icon' => '🧩', 'iconName' => 'apps', 'route' => 'apps'],
+        ['id' => 'settings', 'title' => 'Settings', 'icon' => '⚙️', 'iconName' => 'settings', 'route' => 'settings'],
+    ];
+}
+
+function get_movies(): array
+{
+    $pdo = pdo_or_null();
+    if ($pdo instanceof PDO) {
+        try {
+            $stmt = $pdo->prepare('SELECT id, title, year, poster_url, video_url FROM movies ORDER BY title ASC');
+            $stmt->execute();
+            $rows = $stmt->fetchAll();
+            $movies = [];
+            foreach ($rows as $row) {
+                $movies[] = [
+                    'id' => (string)($row['id'] ?? ''),
+                    'title' => (string)($row['title'] ?? ''),
+                    'year' => $row['year'] !== null ? (int)$row['year'] : null,
+                    'posterUrl' => $row['poster_url'] !== null ? (string)$row['poster_url'] : null,
+                    'streamUrl' => (string)($row['video_url'] ?? ''),
+                ];
+            }
+            return $movies;
+        } catch (Throwable) {
+        }
+    }
+
+    return [
+        [
+            'id' => 'movie-1',
+            'title' => 'Big Buck Bunny',
+            'year' => 2008,
+            'posterUrl' => null,
+            'streamUrl' => 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4',
+        ],
+        [
+            'id' => 'movie-2',
+            'title' => 'Sintel',
+            'year' => 2010,
+            'posterUrl' => null,
+            'streamUrl' => 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/Sintel.mp4',
+        ],
+        [
+            'id' => 'movie-3',
+            'title' => 'Tears of Steel',
+            'year' => 2012,
+            'posterUrl' => null,
+            'streamUrl' => 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/TearsOfSteel.mp4',
+        ],
     ];
 }
 
@@ -197,6 +245,25 @@ if (str_starts_with($path, '/api/')) {
             json_response(['ok' => true, 'data' => ['channels' => get_channels()]]);
         }
 
+        if ($method === 'GET' && $endpoint === '/movies') {
+            require_auth();
+            json_response(['ok' => true, 'data' => ['movies' => get_movies()]]);
+        }
+
+        if ($method === 'GET' && $endpoint === '/server') {
+            require_auth();
+            $dbConfigured = env('DB_HOST') !== null && env('DB_NAME') !== null && env('DB_USER') !== null;
+            $dbConnected = pdo_or_null() instanceof PDO;
+            json_response([
+                'ok' => true,
+                'data' => [
+                    'pinEnabled' => env('TVOS_PIN', '') !== '',
+                    'dbConfigured' => $dbConfigured,
+                    'dbConnected' => $dbConnected,
+                ],
+            ]);
+        }
+
         json_response(['ok' => false, 'error' => ['code' => 'NOT_FOUND', 'message' => 'Unknown endpoint']], 404);
     } catch (Throwable $e) {
         json_response(['ok' => false, 'error' => ['code' => 'SERVER_ERROR', 'message' => 'Unexpected error']], 500);
@@ -216,6 +283,7 @@ $pinEnabled = env('TVOS_PIN', '') !== '';
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@24,600,0,0&display=swap" rel="stylesheet" />
     <script src="https://cdn.jsdelivr.net/npm/hls.js@1.5.17/dist/hls.min.js" integrity="sha256-8L0IDK0orztpITt4dsYMgSuxkZ32l1oU8c4zYBPKv9w=" crossorigin="anonymous"></script>
     <style>
         :root{
@@ -862,6 +930,145 @@ $pinEnabled = env('TVOS_PIN', '') !== '';
             font-size:13px;
             line-height:1.4;
         }
+        .material-symbols-rounded{
+            font-family:'Material Symbols Rounded';
+            font-weight:600;
+            font-style:normal;
+            font-size:22px;
+            line-height:1;
+            letter-spacing:normal;
+            text-transform:none;
+            display:inline-block;
+            white-space:nowrap;
+            word-wrap:normal;
+            direction:ltr;
+            -webkit-font-feature-settings:'liga';
+            -webkit-font-smoothing:antialiased;
+        }
+        .viewScroll{
+            height:100%;
+            overflow:auto;
+            padding:18px;
+        }
+        .sectionTitle{
+            font-weight:800;
+            font-size:18px;
+            letter-spacing:.2px;
+        }
+        .appsGrid{
+            display:grid;
+            grid-template-columns:repeat(3, minmax(0, 1fr));
+            gap:12px;
+        }
+        .appTile{
+            display:flex;
+            align-items:center;
+            gap:12px;
+            padding:14px 14px;
+            border-radius:20px;
+            border:1px solid rgba(255,255,255,.14);
+            background:linear-gradient(180deg, rgba(255,255,255,.10), rgba(255,255,255,.05));
+            outline:none;
+            cursor:pointer;
+            user-select:none;
+        }
+        .appTile:focus{
+            box-shadow:var(--focus);
+            border-color:rgba(74,214,255,.60);
+        }
+        .appTileIcon{
+            width:44px;
+            height:44px;
+            border-radius:16px;
+            background:rgba(0,0,0,.22);
+            border:1px solid rgba(255,255,255,.12);
+            display:grid;
+            place-items:center;
+            flex:0 0 auto;
+        }
+        .appTileText{min-width:0}
+        .appTileTitle{
+            margin:0;
+            font-weight:800;
+            font-size:14px;
+            white-space:nowrap;
+            overflow:hidden;
+            text-overflow:ellipsis;
+        }
+        .appTileSub{
+            margin:4px 0 0;
+            color:var(--muted);
+            font-size:12px;
+            white-space:nowrap;
+            overflow:hidden;
+            text-overflow:ellipsis;
+        }
+        .settingsList{
+            display:flex;
+            flex-direction:column;
+            gap:10px;
+        }
+        .setItem{
+            display:flex;
+            align-items:center;
+            justify-content:space-between;
+            gap:14px;
+            padding:14px 14px;
+            border-radius:20px;
+            border:1px solid rgba(255,255,255,.14);
+            background:rgba(0,0,0,.16);
+            cursor:pointer;
+            outline:none;
+        }
+        .setItem:focus{
+            box-shadow:var(--focus);
+            border-color:rgba(74,214,255,.60);
+        }
+        .setLeft{
+            display:flex;
+            align-items:center;
+            gap:12px;
+            min-width:0;
+        }
+        .setIcon{
+            width:44px;
+            height:44px;
+            border-radius:16px;
+            background:rgba(255,255,255,.08);
+            border:1px solid rgba(255,255,255,.12);
+            display:grid;
+            place-items:center;
+            flex:0 0 auto;
+        }
+        .setText{min-width:0}
+        .setName{
+            margin:0;
+            font-weight:800;
+            font-size:14px;
+            white-space:nowrap;
+            overflow:hidden;
+            text-overflow:ellipsis;
+        }
+        .setMeta{
+            margin:4px 0 0;
+            color:var(--muted);
+            font-size:12px;
+            white-space:nowrap;
+            overflow:hidden;
+            text-overflow:ellipsis;
+        }
+        .setValue{
+            padding:8px 10px;
+            border-radius:999px;
+            border:1px solid rgba(255,255,255,.12);
+            background:rgba(255,255,255,.06);
+            color:rgba(255,255,255,.86);
+            font-size:12px;
+            flex:0 0 auto;
+        }
+        @media (max-width: 980px){
+            .appsGrid{grid-template-columns:repeat(2, minmax(0, 1fr))}
+        }
         .launcher{
             position:absolute;
             left:50%;
@@ -986,6 +1193,40 @@ $pinEnabled = env('TVOS_PIN', '') !== '';
                             </div>
                             <div class="channelList" id="list" role="list"></div>
                         </div>
+                    </div>
+
+                    <div class="liveView" id="moviesView" style="display:none;">
+                        <div class="playerWrap">
+                            <video id="movieVideo" playsinline controls></video>
+                            <div class="playerOverlay">
+                                <div class="nowPlaying">
+                                    <p class="nowPlayingTitle" id="movieNowTitle">Nothing playing</p>
+                                    <p class="nowPlayingSub" id="movieNowSub">Select a movie</p>
+                                </div>
+                                <div class="hint">Enter: play · Backspace: stop · Left: launcher</div>
+                            </div>
+                        </div>
+                        <div class="channelPane">
+                            <div class="channelHeader">
+                                <div class="chip">Movies</div>
+                                <div class="chip" id="movieCount">0</div>
+                            </div>
+                            <div class="channelList" id="moviesList" role="list"></div>
+                        </div>
+                    </div>
+
+                    <div class="viewScroll" id="appsView" style="display:none;">
+                        <div class="sectionTitle">Apps</div>
+                        <div class="row" style="margin-top:12px;">
+                            <input type="text" id="appUrlInput" placeholder="Open URL (https://...)" inputmode="url" autocomplete="url" />
+                            <button class="primary" id="appUrlBtn">Open</button>
+                        </div>
+                        <div class="appsGrid" id="appsGrid" role="list" style="margin-top:14px;"></div>
+                    </div>
+
+                    <div class="viewScroll" id="settingsView" style="display:none;">
+                        <div class="sectionTitle">Settings</div>
+                        <div class="settingsList" id="settingsList" role="list" style="margin-top:12px;"></div>
                     </div>
 
                     <div class="placeholderView" id="placeholderView" style="display:none;">
