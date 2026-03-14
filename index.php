@@ -317,6 +317,7 @@ $pinEnabled = env('TVOS_PIN', '') !== '';
             --text:#E9F0FF;
             --muted:#9FB3D9;
             --accent:#4AD6FF;
+            --accent2:#9C5AFF;
             --danger:#FF6B6B;
             --focus:0 0 0 4px rgba(74,214,255,.35);
             --radius:18px;
@@ -641,7 +642,7 @@ $pinEnabled = env('TVOS_PIN', '') !== '';
             cursor:pointer;
         }
         button.primary{
-            background:linear-gradient(135deg, rgba(74,214,255,.95), rgba(156,90,255,.85));
+            background:linear-gradient(135deg, var(--accent), var(--accent2));
             border-color:rgba(255,255,255,.18);
         }
         button:focus{box-shadow:var(--focus); outline:none}
@@ -655,6 +656,7 @@ $pinEnabled = env('TVOS_PIN', '') !== '';
             height:100%;
             position:relative;
             overflow:hidden;
+            --ui-scale:1;
         }
         .webosBg{
             position:absolute;
@@ -666,6 +668,25 @@ $pinEnabled = env('TVOS_PIN', '') !== '';
             filter: blur(2px);
             opacity:.9;
             pointer-events:none;
+        }
+        .webos[data-wallpaper="mango"] .webosBg{
+            background:
+                radial-gradient(520px 320px at 18% 34%, rgba(255,196,76,.18), transparent 60%),
+                radial-gradient(520px 320px at 86% 20%, rgba(74,214,255,.14), transparent 62%),
+                radial-gradient(720px 420px at 55% 82%, rgba(255,255,255,.06), transparent 70%);
+        }
+        .webos[data-wallpaper="midnight"] .webosBg{
+            background:
+                radial-gradient(520px 320px at 20% 30%, rgba(74,214,255,.10), transparent 64%),
+                radial-gradient(520px 320px at 80% 22%, rgba(156,90,255,.14), transparent 62%),
+                radial-gradient(820px 520px at 55% 86%, rgba(0,0,0,.18), transparent 70%);
+            opacity:.75;
+        }
+        .webos[data-wallpaper="sunset"] .webosBg{
+            background:
+                radial-gradient(560px 340px at 16% 34%, rgba(255,94,164,.16), transparent 62%),
+                radial-gradient(560px 340px at 86% 22%, rgba(255,196,76,.16), transparent 62%),
+                radial-gradient(820px 520px at 55% 86%, rgba(255,255,255,.06), transparent 70%);
         }
         .statusbar{
             position:relative;
@@ -686,7 +707,7 @@ $pinEnabled = env('TVOS_PIN', '') !== '';
             width:44px;
             height:44px;
             border-radius:16px;
-            background:linear-gradient(135deg, rgba(74,214,255,.95), rgba(156,90,255,.85));
+            background:linear-gradient(135deg, var(--accent), var(--accent2));
             box-shadow:0 14px 40px rgba(0,0,0,.45);
             flex:0 0 auto;
         }
@@ -744,11 +765,12 @@ $pinEnabled = env('TVOS_PIN', '') !== '';
             overflow:hidden;
             display:flex;
             flex-direction:column;
+            transform: scale(var(--ui-scale));
             transform-origin: 50% 100%;
             transition: transform .18s ease, filter .18s ease, opacity .18s ease;
         }
         .webos[data-focus="launcher"] .appCard{
-            transform: translateY(26px) scale(.965);
+            transform: translateY(26px) scale(calc(var(--ui-scale) * .965));
             filter:saturate(.95);
         }
         .appCardHeader{
@@ -1168,7 +1190,7 @@ $pinEnabled = env('TVOS_PIN', '') !== '';
             bottom:8px;
             height:4px;
             border-radius:999px;
-            background:linear-gradient(90deg, rgba(74,214,255,.95), rgba(156,90,255,.90));
+            background:linear-gradient(90deg, var(--accent), var(--accent2));
             opacity:0;
             transform:scaleX(.5);
             transform-origin:50% 50%;
@@ -1193,7 +1215,7 @@ $pinEnabled = env('TVOS_PIN', '') !== '';
             place-items:center;
             font-size:22px;
             color:#061019;
-            background:linear-gradient(135deg, rgba(74,214,255,.95), rgba(156,90,255,.85));
+            background:linear-gradient(135deg, var(--accent), var(--accent2));
             box-shadow:0 10px 24px rgba(0,0,0,.35), inset 0 1px 0 rgba(255,255,255,.25);
             border:1px solid rgba(255,255,255,.14);
         }
@@ -1211,6 +1233,11 @@ $pinEnabled = env('TVOS_PIN', '') !== '';
             z-index:10;
         }
         .modal{z-index:20}
+        html[data-reduce-motion="1"] *{
+            transition-duration:0ms !important;
+            animation-duration:0ms !important;
+            scroll-behavior:auto !important;
+        }
         @media (max-width: 980px){
             .stageWebos{position:relative; inset:auto; padding:14px 14px 140px}
             .appCard{height:auto; min-height:520px}
@@ -1475,6 +1502,12 @@ $pinEnabled = env('TVOS_PIN', '') !== '';
                 showVideoControls: true,
                 hlsLowLatency: true,
                 backgroundPlayback: false,
+                reduceMotion: false,
+                clock24h: true,
+                themePreset: 'aqua',
+                wallpaperPreset: 'aurora',
+                uiScale: 1,
+                defaultVolume: 0.9,
             };
             try {
                 const raw = localStorage.getItem(SETTINGS_KEY);
@@ -1496,6 +1529,22 @@ $pinEnabled = env('TVOS_PIN', '') !== '';
         function applySettings() {
             const s = state.settings ?? loadSettings();
             state.settings = s;
+            document.documentElement.dataset.reduceMotion = s.reduceMotion ? '1' : '0';
+            shell.dataset.wallpaper = String(s.wallpaperPreset ?? 'aurora');
+            shell.style.setProperty('--ui-scale', String(s.uiScale ?? 1));
+
+            const themes = {
+                aqua: { accent: '#4AD6FF', accent2: '#9C5AFF', focus: '0 0 0 4px rgba(74,214,255,.35)' },
+                purple: { accent: '#9C5AFF', accent2: '#4AD6FF', focus: '0 0 0 4px rgba(156,90,255,.35)' },
+                mango: { accent: '#FFC44C', accent2: '#FF5EA4', focus: '0 0 0 4px rgba(255,196,76,.34)' },
+                mono: { accent: 'rgba(255,255,255,.90)', accent2: '#4AD6FF', focus: '0 0 0 4px rgba(255,255,255,.18)' },
+            };
+            const themeKey = String(s.themePreset ?? 'aqua');
+            const theme = themes[themeKey] ?? themes.aqua;
+            document.documentElement.style.setProperty('--accent', theme.accent);
+            document.documentElement.style.setProperty('--accent2', theme.accent2);
+            document.documentElement.style.setProperty('--focus', theme.focus);
+
             if (s.showVideoControls) {
                 videoEl.setAttribute('controls', '');
                 movieVideoEl.setAttribute('controls', '');
@@ -2050,9 +2099,18 @@ $pinEnabled = env('TVOS_PIN', '') !== '';
 
         function updateClock() {
             const now = new Date();
-            const hh = String(now.getHours()).padStart(2, '0');
+            const s = state.settings ?? loadSettings();
+            state.settings = s;
+            let hours = now.getHours();
             const mm = String(now.getMinutes()).padStart(2, '0');
-            clockEl.textContent = `${hh}:${mm}`;
+            if (!s.clock24h) {
+                const suffix = hours >= 12 ? 'PM' : 'AM';
+                hours = hours % 12;
+                if (hours === 0) hours = 12;
+                clockEl.textContent = `${String(hours).padStart(2, '0')}:${mm} ${suffix}`;
+                return;
+            }
+            clockEl.textContent = `${String(hours).padStart(2, '0')}:${mm}`;
         }
 
         function updateNetworkStatus() {
