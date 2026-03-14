@@ -11,6 +11,27 @@ if (!is_dir($sessionPath)) {
 @session_save_path($sessionPath);
 session_start();
 
+$cookieName = 'mango_os_id';
+$osId = '';
+if (isset($_COOKIE[$cookieName]) && is_string($_COOKIE[$cookieName])) {
+    $candidate = (string)$_COOKIE[$cookieName];
+    if (preg_match('/^[a-zA-Z0-9_-]{10,80}$/', $candidate) === 1) {
+        $osId = $candidate;
+    }
+}
+if ($osId === '') {
+    $osId = 'mgo_' . bin2hex(random_bytes(16));
+}
+$_SESSION['mango_os_id'] = $osId;
+$isHttps = isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off';
+setcookie($cookieName, $osId, [
+    'expires' => time() + (60 * 60 * 24 * 365),
+    'path' => '/',
+    'secure' => $isHttps,
+    'httponly' => true,
+    'samesite' => 'Lax',
+]);
+
 function env(string $key, ?string $default = null): ?string
 {
     $value = getenv($key);
@@ -214,7 +235,8 @@ if (str_starts_with($path, '/api/')) {
         }
 
         if ($method === 'GET' && $endpoint === '/me') {
-            json_response(['ok' => true, 'data' => ['authenticated' => is_authed()]]);
+            $osId = isset($_SESSION['mango_os_id']) ? (string)$_SESSION['mango_os_id'] : null;
+            json_response(['ok' => true, 'data' => ['authenticated' => is_authed(), 'osId' => $osId]]);
         }
 
         if ($method === 'POST' && $endpoint === '/login') {
@@ -1551,81 +1573,309 @@ $pinEnabled = env('TVOS_PIN', '') !== '';
             });
         }
 
+        function renderMovies() {
+            moviesListEl.innerHTML = '';
+            movieCountEl.textContent = String(state.movies.length);
+            const s = state.settings ?? loadSettings();
+            state.settings = s;
+
+            if (state.movies.length === 0) {
+                const empty = document.createElement('div');
+                empty.className = 'chanItem';
+                empty.tabIndex = 0;
+                empty.innerHTML = `
+                    <div class="chanAvatar" aria-hidden="true">${materialIcon('movie')}</div>
+                    <div class="chanText">
+                        <p class="chanName">No movies</p>
+                        <p class="chanMeta">Configure a movies table or keep demo content</p>
+                    </div>
+                `;
+                moviesListEl.appendChild(empty);
+                return;
+            }
+
+            state.movies.forEach((mv, idx) => {
+                const item = document.createElement('div');
+                item.className = 'chanItem';
+                item.tabIndex = 0;
+                item.setAttribute('role', 'listitem');
+                item.dataset.index = String(idx);
+                const meta = mv.year ? String(mv.year) : String(mv.streamUrl ?? '');
+                item.innerHTML = `
+                    <div class="chanAvatar" aria-hidden="true">${materialIcon('theaters')}</div>
+                    <div class="chanText">
+                        <p class="chanName">${escapeHtml(mv.title ?? '')}</p>
+                        <p class="chanMeta">${escapeHtml(meta)}</p>
+                    </div>
+                `;
+                item.addEventListener('click', () => playMovie(idx));
+                item.addEventListener('focus', () => {
+                    setFocusMode('movies');
+                    state.movieIndex = idx;
+                    if (s.autoplayOnHighlight) playMovie(idx);
+                });
+                moviesListEl.appendChild(item);
+            });
+        }
+
+        function renderApps() {
+            appsGridEl.innerHTML = '';
+            FEATURED_APPS.forEach((app, idx) => {
+                const tile = document.createElement('div');
+                tile.className = 'appTile';
+                tile.tabIndex = 0;
+                tile.setAttribute('role', 'listitem');
+                tile.dataset.index = String(idx);
+                tile.innerHTML = `
+                    <div class="appTileIcon" aria-hidden="true">${materialIcon(app.iconName)}</div>
+                    <div class="appTileText">
+                        <p class="appTileTitle">${escapeHtml(app.title)}</p>
+                        <p class="appTileSub">${escapeHtml(app.sub)}</p>
+                    </div>
+                `;
+                tile.addEventListener('focus', () => {
+                    setFocusMode('apps');
+                    state.appsIndex = idx;
+                });
+                tile.addEventListener('click', () => activateAppTile(idx));
+                appsGridEl.appendChild(tile);
+            });
+        }
+
+        function normalizeUrl(url) {
+            const u = String(url ?? '').trim();
+            if (u === '') return '';
+            if (/^https?:\/\//i.test(u)) return u;
+            return `https://${u}`;
+        }
+
+        function openExternal(url) {
+            const finalUrl = normalizeUrl(url);
+            if (finalUrl === '') {
+                showToast('Enter a URL', 2200);
+                return;
+            }
+            window.open(finalUrl, '_blank', 'noopener,noreferrer');
+        }
+
+        function activateAppTile(idx) {
+            const app = FEATURED_APPS[idx];
+            if (!app) return;
+            if (app.action === 'openUrl') {
+                appUrlInputEl.focus();
+                appUrlInputEl.select();
+                return;
+            }
+            if (app.url) openExternal(app.url);
+        }
+
+        function buildSettingsItems() {
+            const s = state.settings ?? loadSettings();
+            state.settings = s;
+            const items = [
+                { type: 'toggle', title: 'Autoplay on highlight', meta: 'Play when selecting items', icon: 'play_circle', key: 'autoplayOnHighlight' },
+                { type: 'toggle', title: 'Remember last playback', meta: 'Auto-resume on next load', icon: 'history', key: 'rememberLast' },
+                { type: 'toggle', title: 'Video controls', meta: 'Show/hide native controls', icon: 'tune', key: 'showVideoControls' },
+                { type: 'toggle', title: 'HLS low latency', meta: 'Hls.js low latency mode', icon: 'speed', key: 'hlsLowLatency' },
+                { type: 'toggle', title: 'Background playback', meta: 'Keep playing when switching apps', icon: 'headphones', key: 'backgroundPlayback' },
+            ];
+
+            if (state.server) {
+                items.push(
+                    { type: 'info', title: 'PIN lock', meta: '', icon: 'lock', value: state.server.pinEnabled ? 'Enabled' : 'Disabled' },
+                    { type: 'info', title: 'Database', meta: '', icon: 'database', value: state.server.dbConnected ? 'Connected' : (state.server.dbConfigured ? 'Not connected' : 'Not configured') },
+                );
+            }
+
+            items.push(
+                { type: 'action', title: 'Check server health', meta: 'Call /api/health', icon: 'health_and_safety', action: 'health' },
+                { type: 'action', title: 'Stop playback', meta: 'Stop all video', icon: 'stop_circle', action: 'stop' },
+                { type: 'action', title: 'Reset local settings', meta: 'Clear saved settings & last playback', icon: 'restart_alt', action: 'reset' },
+            );
+
+            if (pinEnabled) {
+                items.push({ type: 'action', title: 'Log out', meta: 'Lock this TV OS', icon: 'logout', action: 'logout' });
+            }
+
+            return items;
+        }
+
+        function renderSettings() {
+            state.settingsItems = buildSettingsItems();
+            settingsListEl.innerHTML = '';
+            state.settingsItems.forEach((it, idx) => {
+                const el = document.createElement('div');
+                el.className = 'setItem';
+                el.tabIndex = 0;
+                el.setAttribute('role', 'listitem');
+                el.dataset.index = String(idx);
+
+                let valueText = '';
+                if (it.type === 'toggle') {
+                    valueText = (state.settings?.[it.key] ?? false) ? 'On' : 'Off';
+                } else if (it.type === 'info') {
+                    valueText = it.value ?? '';
+                } else {
+                    valueText = 'Run';
+                }
+
+                el.innerHTML = `
+                    <div class="setLeft">
+                        <div class="setIcon" aria-hidden="true">${materialIcon(it.icon)}</div>
+                        <div class="setText">
+                            <p class="setName">${escapeHtml(it.title)}</p>
+                            <p class="setMeta">${escapeHtml(it.meta ?? '')}</p>
+                        </div>
+                    </div>
+                    <div class="setValue">${escapeHtml(valueText)}</div>
+                `;
+
+                el.addEventListener('focus', () => {
+                    setFocusMode('settings');
+                    state.settingsIndex = idx;
+                });
+                el.addEventListener('click', () => activateSetting(idx));
+                settingsListEl.appendChild(el);
+            });
+        }
+
+        async function activateSetting(idx) {
+            const it = state.settingsItems[idx];
+            if (!it) return;
+            if (it.type === 'toggle') {
+                const s = state.settings ?? loadSettings();
+                const next = { ...s, [it.key]: !s[it.key] };
+                saveSettings(next);
+                renderSettings();
+                showToast(`${it.title}: ${next[it.key] ? 'On' : 'Off'}`);
+                return;
+            }
+            if (it.type === 'action') {
+                if (it.action === 'stop') {
+                    stopAllPlayback();
+                    showToast('Stopped');
+                    return;
+                }
+                if (it.action === 'reset') {
+                    localStorage.removeItem(SETTINGS_KEY);
+                    localStorage.removeItem(LAST_PLAY_KEY);
+                    state.settings = loadSettings();
+                    applySettings();
+                    renderSettings();
+                    showToast('Reset complete');
+                    return;
+                }
+                if (it.action === 'logout') {
+                    await logout();
+                    return;
+                }
+                if (it.action === 'health') {
+                    try {
+                        const d = await apiFetch('/api/health');
+                        showToast(`OK · ${d.time}`, 2800);
+                    } catch (e) {
+                        showToast(String(e?.message ?? e), 3200);
+                    }
+                }
+            }
+        }
+
         function syncActiveApp() {
             const app = state.apps[state.appIndex];
             const title = app?.title ?? 'Home';
             const route = app?.route ?? 'apps';
+            const prevRoute = state.activeRoute;
+            const s = state.settings ?? loadSettings();
+            state.settings = s;
+            if (prevRoute !== route && !s.backgroundPlayback) {
+                stopAllPlayback();
+            }
             state.activeRoute = route;
 
             cardTitleEl.textContent = title;
-            cardHintEl.textContent = route === 'live' ? 'Live TV' : route === 'settings' ? 'Settings' : 'App';
+            cardHintEl.textContent = route === 'live' ? 'Live TV' : route === 'movies' ? 'Movies' : route === 'apps' ? 'Apps' : route === 'settings' ? 'Settings' : 'Home';
+            cardSubEl.textContent = route === 'live'
+                ? 'Up/Enter: channels · Left: launcher'
+                : route === 'movies'
+                    ? 'Up/Enter: movies · Left: launcher'
+                    : route === 'apps'
+                        ? 'Open URLs and web apps'
+                        : route === 'settings'
+                            ? 'Toggles and diagnostics'
+                            : 'Launcher';
 
-            if (route === 'live') {
-                cardSubEl.textContent = 'Up/Enter: channels · Down: launcher';
-                liveViewEl.style.display = 'grid';
-                placeholderViewEl.style.display = 'none';
-                return;
+            liveViewEl.style.display = route === 'live' ? 'grid' : 'none';
+            moviesViewEl.style.display = route === 'movies' ? 'grid' : 'none';
+            appsViewEl.style.display = route === 'apps' ? 'block' : 'none';
+            settingsViewEl.style.display = route === 'settings' ? 'block' : 'none';
+            placeholderViewEl.style.display = (route !== 'live' && route !== 'movies' && route !== 'apps' && route !== 'settings') ? 'flex' : 'none';
+
+            if (route === 'apps') {
+                renderApps();
+            }
+            if (route === 'settings') {
+                renderSettings();
             }
 
-            if (state.playing) stopPlayback();
-
-            liveViewEl.style.display = 'none';
-            placeholderViewEl.style.display = 'flex';
             phIconEl.textContent = app?.icon ?? '🧩';
             phTitleEl.textContent = title;
-
-            if (route === 'settings') {
-                phSubEl.textContent = pinEnabled ? 'Press Esc to log out. Backspace stops playback.' : 'PIN lock is disabled. Set TVOS_PIN to enable.';
-                return;
-            }
-            phSubEl.textContent = 'Demo screen. Live TV plays streams from /api/channels (MySQL-backed if configured).';
+            phSubEl.textContent = route === 'settings'
+                ? (pinEnabled ? 'Esc logs out. Backspace stops playback.' : 'PIN lock is disabled. Set TVOS_PIN to enable.')
+                : 'This is a webOS-style UI shell.';
         }
 
         function openAppFromLauncher(moveFocus) {
             syncActiveApp();
-            if (state.activeRoute === 'live' && moveFocus) {
+            if (!moveFocus) return;
+            if (state.activeRoute === 'live') {
                 setFocusMode('channels');
                 focusChannel(state.channelIndex);
                 return;
             }
-            if (moveFocus) {
-                setFocusMode('launcher');
-                focusLauncher(state.appIndex);
+            if (state.activeRoute === 'movies') {
+                setFocusMode('movies');
+                focusMovie(state.movieIndex);
+                return;
             }
+            if (state.activeRoute === 'apps') {
+                setFocusMode('apps');
+                focusAppTile(state.appsIndex);
+                return;
+            }
+            if (state.activeRoute === 'settings') {
+                setFocusMode('settings');
+                focusSetting(state.settingsIndex);
+                return;
+            }
+            setFocusMode('launcher');
+            focusLauncher(state.appIndex);
         }
 
         function stopPlayback() {
-            if (state.hls) {
-                try { state.hls.destroy(); } catch {}
-                state.hls = null;
-            }
-            videoEl.pause();
-            videoEl.removeAttribute('src');
-            videoEl.load();
-            state.playing = null;
-            nowTitleEl.textContent = 'Nothing playing';
-            nowSubEl.textContent = 'Select a channel';
+            stopAllPlayback();
         }
 
         function isHlsUrl(url) {
             return /\.m3u8(\?.*)?$/i.test(url);
         }
 
-        function playUrl(url) {
-            stopPlayback();
+        function playUrl(url, targetVideo = videoEl) {
+            stopAllPlayback();
             if (!url) return;
+            const s = state.settings ?? loadSettings();
+            state.settings = s;
             if (isHlsUrl(url)) {
-                if (videoEl.canPlayType('application/vnd.apple.mpegurl')) {
-                    videoEl.src = url;
-                    videoEl.play().catch(() => {});
+                if (targetVideo.canPlayType('application/vnd.apple.mpegurl')) {
+                    targetVideo.src = url;
+                    targetVideo.play().catch(() => {});
                     return;
                 }
                 if (window.Hls && window.Hls.isSupported()) {
-                    state.hls = new window.Hls({ enableWorker: true, lowLatencyMode: true });
+                    state.hls = new window.Hls({ enableWorker: true, lowLatencyMode: !!s.hlsLowLatency });
                     state.hls.loadSource(url);
-                    state.hls.attachMedia(videoEl);
+                    state.hls.attachMedia(targetVideo);
                     state.hls.on(window.Hls.Events.MANIFEST_PARSED, () => {
-                        videoEl.play().catch(() => {});
+                        targetVideo.play().catch(() => {});
                     });
                     state.hls.on(window.Hls.Events.ERROR, (_evt, data) => {
                         if (data?.fatal) showToast('Playback error: stream not supported', 3200);
@@ -1635,18 +1885,40 @@ $pinEnabled = env('TVOS_PIN', '') !== '';
                 showToast('HLS not supported in this browser (need Hls.js)', 3200);
                 return;
             }
-            videoEl.src = url;
-            videoEl.play().catch(() => {});
+            targetVideo.src = url;
+            targetVideo.play().catch(() => {});
+        }
+
+        function rememberLastPlayback(payload) {
+            try {
+                const s = state.settings ?? loadSettings();
+                state.settings = s;
+                if (!s.rememberLast) return;
+                localStorage.setItem(LAST_PLAY_KEY, JSON.stringify({ ...payload, time: Date.now() }));
+            } catch {
+            }
         }
 
         function playChannel(idx) {
             const ch = state.channels[idx];
             if (!ch) return;
             state.channelIndex = idx;
-            state.playing = ch;
+            state.playing = { type: 'channel', id: ch.id, title: ch.name, url: ch.streamUrl };
             nowTitleEl.textContent = ch.name;
             nowSubEl.textContent = ch.streamUrl;
-            playUrl(ch.streamUrl);
+            rememberLastPlayback({ type: 'channel', id: ch.id });
+            playUrl(ch.streamUrl, videoEl);
+        }
+
+        function playMovie(idx) {
+            const mv = state.movies[idx];
+            if (!mv) return;
+            state.movieIndex = idx;
+            state.playing = { type: 'movie', id: mv.id, title: mv.title, url: mv.streamUrl };
+            movieNowTitleEl.textContent = mv.title ?? 'Movie';
+            movieNowSubEl.textContent = mv.year ? String(mv.year) : String(mv.streamUrl ?? '');
+            rememberLastPlayback({ type: 'movie', id: mv.id });
+            playUrl(mv.streamUrl, movieVideoEl);
         }
 
         function updateClock() {
