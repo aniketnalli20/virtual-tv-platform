@@ -1100,17 +1100,39 @@ $pinEnabled = env('TVOS_PIN', '') !== '';
             width:min(1060px, 94vw);
             height:106px;
             border-radius:32px;
-            background:rgba(0,0,0,.30);
-            border:1px solid rgba(255,255,255,.12);
+            background:linear-gradient(180deg, rgba(255,255,255,.08), rgba(0,0,0,.34));
+            border:1px solid rgba(255,255,255,.14);
             backdrop-filter:blur(18px);
-            box-shadow:0 14px 60px rgba(0,0,0,.55);
+            box-shadow:0 18px 80px rgba(0,0,0,.65), inset 0 1px 0 rgba(255,255,255,.14);
             display:flex;
             align-items:center;
-            gap:12px;
-            padding:12px 14px;
-            overflow:auto;
+            gap:14px;
+            padding:14px 18px;
+            overflow-x:auto;
+            overflow-y:hidden;
             z-index:8;
             scroll-behavior:smooth;
+            scroll-snap-type:x mandatory;
+            position:fixed;
+        }
+        .launcher::before{
+            content:"";
+            position:absolute;
+            inset:1px;
+            border-radius:31px;
+            background:
+                radial-gradient(420px 120px at 10% 25%, rgba(74,214,255,.12), transparent 60%),
+                radial-gradient(420px 120px at 90% 35%, rgba(156,90,255,.10), transparent 62%),
+                linear-gradient(180deg, rgba(255,255,255,.06), rgba(255,255,255,0));
+            pointer-events:none;
+        }
+        .launcher::after{
+            content:"";
+            position:absolute;
+            inset:0;
+            border-radius:32px;
+            box-shadow: inset 0 0 0 1px rgba(255,255,255,.08);
+            pointer-events:none;
         }
         .launcher::-webkit-scrollbar{height:8px}
         .launcher::-webkit-scrollbar-thumb{background:rgba(255,255,255,.12); border-radius:999px}
@@ -1119,7 +1141,7 @@ $pinEnabled = env('TVOS_PIN', '') !== '';
             height:82px;
             border-radius:26px;
             border:1px solid rgba(255,255,255,.14);
-            background:linear-gradient(180deg, rgba(255,255,255,.10), rgba(255,255,255,.05));
+            background:linear-gradient(180deg, rgba(255,255,255,.12), rgba(255,255,255,.06));
             display:flex;
             flex-direction:column;
             align-items:center;
@@ -1129,12 +1151,39 @@ $pinEnabled = env('TVOS_PIN', '') !== '';
             outline:none;
             user-select:none;
             flex:0 0 auto;
-            transition: transform .12s ease, border-color .12s ease, background .12s ease, box-shadow .12s ease;
+            scroll-snap-align:center;
+            position:relative;
+            box-shadow:0 10px 24px rgba(0,0,0,.30);
+            transition: transform .14s ease, border-color .14s ease, background .14s ease, box-shadow .14s ease, filter .14s ease;
+        }
+        .appIcon:hover{
+            border-color:rgba(255,255,255,.20);
+            transform: translateY(-2px) scale(1.03);
+        }
+        .appIcon::after{
+            content:"";
+            position:absolute;
+            left:14px;
+            right:14px;
+            bottom:8px;
+            height:4px;
+            border-radius:999px;
+            background:linear-gradient(90deg, rgba(74,214,255,.95), rgba(156,90,255,.90));
+            opacity:0;
+            transform:scaleX(.5);
+            transform-origin:50% 50%;
+            transition: opacity .14s ease, transform .14s ease;
         }
         .appIcon:focus{
             box-shadow:var(--focus);
             border-color:rgba(74,214,255,.60);
             transform: translateY(-3px) scale(1.06);
+            filter:saturate(1.05);
+        }
+        .appIcon:focus::after,
+        .appIcon[aria-selected="true"]::after{
+            opacity:1;
+            transform:scaleX(1);
         }
         .appGlyph{
             width:46px;
@@ -1145,6 +1194,8 @@ $pinEnabled = env('TVOS_PIN', '') !== '';
             font-size:22px;
             color:#061019;
             background:linear-gradient(135deg, rgba(74,214,255,.95), rgba(156,90,255,.85));
+            box-shadow:0 10px 24px rgba(0,0,0,.35), inset 0 1px 0 rgba(255,255,255,.25);
+            border:1px solid rgba(255,255,255,.14);
         }
         .appLabel{
             font-size:12px;
@@ -1475,6 +1526,12 @@ $pinEnabled = env('TVOS_PIN', '') !== '';
             if (el) el.focus();
         }
 
+        function setLauncherSelected(selectedIndex) {
+            launcherEl.querySelectorAll('.appIcon[data-index]').forEach((el) => {
+                el.setAttribute('aria-selected', el.dataset.index === String(selectedIndex) ? 'true' : 'false');
+            });
+        }
+
         function focusMovie(idx) {
             const el = moviesListEl.querySelector(`.chanItem[data-index="${idx}"]`);
             if (el) el.focus();
@@ -1507,6 +1564,7 @@ $pinEnabled = env('TVOS_PIN', '') !== '';
                 item.tabIndex = 0;
                 item.setAttribute('role', 'listitem');
                 item.dataset.index = String(idx);
+                item.setAttribute('aria-selected', idx === state.appIndex ? 'true' : 'false');
 
                 const iconHtml = app?.iconName
                     ? `<span class="material-symbols-rounded" aria-hidden="true">${escapeHtml(app.iconName)}</span>`
@@ -1523,6 +1581,7 @@ $pinEnabled = env('TVOS_PIN', '') !== '';
                 item.addEventListener('focus', () => {
                     setFocusMode('launcher');
                     state.appIndex = idx;
+                    setLauncherSelected(idx);
                     syncActiveApp();
                 });
                 launcherEl.appendChild(item);
