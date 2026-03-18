@@ -324,6 +324,10 @@ $pinEnabled = env('TVOS_PIN', '') !== '';
         }
         *{box-sizing:border-box}
         html,body{height:100%}
+        a, a:visited, a:hover, a:active, a:focus{
+            color:inherit;
+            text-decoration:none;
+        }
         body{
             margin:0;
             font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;
@@ -1228,10 +1232,7 @@ $pinEnabled = env('TVOS_PIN', '') !== '';
             height:4px;
             border-radius:999px;
             background:linear-gradient(90deg, var(--accent), var(--accent2));
-            opacity:0;
-            transform:scaleX(.5);
-            transform-origin:50% 50%;
-            transition: opacity .14s ease, transform .14s ease;
+            display:none;
         }
         .appIcon:focus{
             box-shadow:var(--focus);
@@ -1241,8 +1242,7 @@ $pinEnabled = env('TVOS_PIN', '') !== '';
         }
         .appIcon:focus::after,
         .appIcon[aria-selected="true"]::after{
-            opacity:1;
-            transform:scaleX(1);
+            display:none;
         }
         .appGlyph{
             width:46px;
