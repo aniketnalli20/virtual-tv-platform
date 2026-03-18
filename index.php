@@ -1433,6 +1433,16 @@ $pinEnabled = env('TVOS_PIN', '') !== '';
         const googleQueryInputEl = document.getElementById('googleQueryInput');
         const googleSearchBtnEl = document.getElementById('googleSearchBtn');
 
+        const browserViewEl = document.getElementById('browserView');
+        const browserFrameEl = document.getElementById('browserFrame');
+        const browserUrlInputEl = document.getElementById('browserUrlInput');
+        const browserGoBtnEl = document.getElementById('browserGoBtn');
+        const browserBackBtnEl = document.getElementById('browserBackBtn');
+        const browserForwardBtnEl = document.getElementById('browserForwardBtn');
+        const browserReloadBtnEl = document.getElementById('browserReloadBtn');
+        const browserOpenNewTabBtnEl = document.getElementById('browserOpenNewTabBtn');
+        const browserCloseBtnEl = document.getElementById('browserCloseBtn');
+
         const settingsViewEl = document.getElementById('settingsView');
         const settingsListEl = document.getElementById('settingsList');
 
@@ -1539,6 +1549,7 @@ $pinEnabled = env('TVOS_PIN', '') !== '';
                 showVideoControls: true,
                 hlsLowLatency: true,
                 backgroundPlayback: false,
+                openLinksInOs: false,
                 reduceMotion: false,
                 clock24h: true,
                 themePreset: 'aqua',
@@ -1807,10 +1818,31 @@ $pinEnabled = env('TVOS_PIN', '') !== '';
             return `https://${u}`;
         }
 
+        function openInOsBrowser(url) {
+            const finalUrl = normalizeUrl(url);
+            if (finalUrl === '') {
+                showToast('Enter a URL', 2200);
+                return;
+            }
+            appsViewEl.style.display = 'none';
+            browserViewEl.style.display = 'block';
+            browserUrlInputEl.value = finalUrl;
+            browserFrameEl.src = finalUrl;
+            setFocusMode('browser');
+            browserUrlInputEl.focus();
+            browserUrlInputEl.select();
+        }
+
         function openExternal(url) {
             const finalUrl = normalizeUrl(url);
             if (finalUrl === '') {
                 showToast('Enter a URL', 2200);
+                return;
+            }
+            const s = state.settings ?? loadSettings();
+            state.settings = s;
+            if (s.openLinksInOs) {
+                openInOsBrowser(finalUrl);
                 return;
             }
             window.open(finalUrl, '_blank', 'noopener,noreferrer');
@@ -1866,6 +1898,7 @@ $pinEnabled = env('TVOS_PIN', '') !== '';
                 { type: 'toggle', title: 'Video controls', meta: 'Show/hide native controls', icon: 'tune', key: 'showVideoControls' },
                 { type: 'toggle', title: 'HLS low latency', meta: 'Hls.js low latency mode', icon: 'speed', key: 'hlsLowLatency' },
                 { type: 'toggle', title: 'Background playback', meta: 'Keep playing when switching apps', icon: 'headphones', key: 'backgroundPlayback' },
+                { type: 'toggle', title: 'Open links inside OS', meta: 'Use built-in browser (some sites may block embedding)', icon: 'web', key: 'openLinksInOs' },
                 { type: 'toggle', title: 'Reduce motion', meta: 'Disable most animations', icon: 'motion_photos_off', key: 'reduceMotion' },
                 { type: 'toggle', title: '24-hour clock', meta: 'Clock format', icon: 'schedule', key: 'clock24h' },
                 {
@@ -2537,6 +2570,50 @@ $pinEnabled = env('TVOS_PIN', '') !== '';
         googleSearchBtnEl.addEventListener('click', () => {
             openGoogleSearch(googleQueryInputEl.value);
         });
+
+        function closeOsBrowser() {
+            browserFrameEl.removeAttribute('src');
+            browserViewEl.style.display = 'none';
+            if (state.activeRoute === 'apps') {
+                appsViewEl.style.display = 'block';
+                setFocusMode('apps');
+                focusAppTile(state.appsIndex);
+                return;
+            }
+            setFocusMode('launcher');
+            focusLauncher(state.appIndex);
+        }
+
+        function navigateBrowserTo(input) {
+            const url = normalizeUrl(input);
+            if (url === '') {
+                showToast('Enter a URL', 2200);
+                return;
+            }
+            browserUrlInputEl.value = url;
+            browserFrameEl.src = url;
+        }
+
+        browserGoBtnEl.addEventListener('click', () => {
+            navigateBrowserTo(browserUrlInputEl.value);
+        });
+        browserUrlInputEl.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') navigateBrowserTo(browserUrlInputEl.value);
+            if (e.key === 'Escape') closeOsBrowser();
+        });
+        browserBackBtnEl.addEventListener('click', () => {
+            try { browserFrameEl.contentWindow.history.back(); } catch {}
+        });
+        browserForwardBtnEl.addEventListener('click', () => {
+            try { browserFrameEl.contentWindow.history.forward(); } catch {}
+        });
+        browserReloadBtnEl.addEventListener('click', () => {
+            try { browserFrameEl.contentWindow.location.reload(); } catch {}
+        });
+        browserOpenNewTabBtnEl.addEventListener('click', () => {
+            openExternal(browserUrlInputEl.value);
+        });
+        browserCloseBtnEl.addEventListener('click', closeOsBrowser);
 
         pinBtnEl.addEventListener('click', async () => {
             const pin = (pinInputEl.value ?? '').trim();
