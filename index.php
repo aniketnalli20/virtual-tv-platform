@@ -688,6 +688,20 @@ $pinEnabled = env('TVOS_PIN', '') !== '';
                 radial-gradient(560px 340px at 86% 22%, rgba(255,196,76,.16), transparent 62%),
                 radial-gradient(820px 520px at 55% 86%, rgba(255,255,255,.06), transparent 70%);
         }
+        .webos[data-wallpaper="forest"] .webosBg{
+            background:
+                radial-gradient(560px 340px at 18% 34%, rgba(90,240,160,.14), transparent 62%),
+                radial-gradient(560px 340px at 86% 22%, rgba(74,214,255,.10), transparent 62%),
+                radial-gradient(860px 540px at 55% 86%, rgba(0,0,0,.18), transparent 70%);
+            opacity:.82;
+        }
+        .webos[data-wallpaper="nebula"] .webosBg{
+            background:
+                radial-gradient(620px 380px at 18% 34%, rgba(156,90,255,.18), transparent 62%),
+                radial-gradient(620px 380px at 86% 22%, rgba(74,214,255,.14), transparent 62%),
+                radial-gradient(860px 540px at 55% 86%, rgba(255,94,164,.10), transparent 72%);
+            opacity:.9;
+        }
         .statusbar{
             position:relative;
             z-index:6;
@@ -745,6 +759,15 @@ $pinEnabled = env('TVOS_PIN', '') !== '';
             backdrop-filter:blur(12px);
             color:rgba(255,255,255,.86);
         }
+        .chipBtn{
+            display:flex;
+            align-items:center;
+            gap:8px;
+            cursor:pointer;
+            user-select:none;
+            outline:none;
+        }
+        .chipBtn:focus{box-shadow:var(--focus)}
         .stageWebos{
             position:absolute;
             inset:74px 0 0 0;
@@ -1392,6 +1415,61 @@ $pinEnabled = env('TVOS_PIN', '') !== '';
         .webos[data-focus="overview"] .overview{display:flex}
         .webos[data-focus="overview"] .launcher{opacity:.25; filter: blur(2px); pointer-events:none}
         .webos[data-focus="overview"] .appCard{opacity:.25; filter: blur(6px) saturate(.9); transform: translateY(36px) scale(calc(var(--ui-scale) * .94))}
+        .quickMenu{
+            position:fixed;
+            inset:0;
+            display:none;
+            align-items:flex-start;
+            justify-content:flex-end;
+            padding:92px 26px 150px;
+            z-index:11;
+        }
+        .quickMenuScrim{
+            position:absolute;
+            inset:0;
+            background:linear-gradient(180deg, rgba(0,0,0,.22), rgba(0,0,0,.65));
+            backdrop-filter: blur(10px);
+        }
+        .quickMenuPanel{
+            position:relative;
+            width:min(520px, 92vw);
+            border-radius:26px;
+            border:1px solid rgba(255,255,255,.14);
+            background:linear-gradient(180deg, rgba(255,255,255,.10), rgba(0,0,0,.38));
+            backdrop-filter:blur(18px);
+            box-shadow:0 18px 70px rgba(0,0,0,.55);
+            overflow:hidden;
+        }
+        .quickMenuHeader{
+            padding:16px 18px 12px;
+            display:flex;
+            align-items:center;
+            justify-content:space-between;
+            gap:12px;
+            border-bottom:1px solid rgba(255,255,255,.10);
+        }
+        .quickMenuHeaderTitle{
+            display:flex;
+            align-items:center;
+            gap:10px;
+            min-width:0;
+        }
+        .quickMenuHeaderTitle h2{
+            margin:0;
+            font-size:14px;
+            letter-spacing:.5px;
+            text-transform:uppercase;
+            color:rgba(255,255,255,.78);
+            white-space:nowrap;
+            overflow:hidden;
+            text-overflow:ellipsis;
+        }
+        .quickMenuBody{
+            padding:14px;
+        }
+        .webos[data-focus="menu"] .quickMenu{display:flex}
+        .webos[data-focus="menu"] .launcher{opacity:.22; filter: blur(2px); pointer-events:none}
+        .webos[data-focus="menu"] .appCard{opacity:.22; filter: blur(6px) saturate(.9); transform: translateY(36px) scale(calc(var(--ui-scale) * .94))}
         .toast{
             bottom:142px;
             z-index:10;
@@ -1419,13 +1497,17 @@ $pinEnabled = env('TVOS_PIN', '') !== '';
                 <div class="brandMark" aria-hidden="true"></div>
                 <div class="statusText">
                     <p class="statusTitle"><?= htmlspecialchars($platformName, ENT_QUOTES, 'UTF-8') ?></p>
-                    <p class="statusSub">OS: <?= htmlspecialchars($osName, ENT_QUOTES, 'UTF-8') ?> · Left/Right: launcher · Up: open · Tab: switcher · Enter: select</p>
+                    <p class="statusSub">OS: <?= htmlspecialchars($osName, ENT_QUOTES, 'UTF-8') ?> · Left/Right: launcher · Up: open · Tab: switcher · M/Menu: quick menu · Enter: select</p>
                 </div>
             </div>
             <div class="statusRight">
                 <div class="chip" id="authPill">Guest</div>
                 <div class="chip" id="netStatus">Offline</div>
                 <div class="chip" id="clock">--:--</div>
+                <div class="chip chipBtn" id="menuBtn" tabindex="0" role="button" aria-label="Menu">
+                    <span class="material-symbols-rounded" aria-hidden="true">menu</span>
+                    Menu
+                </div>
             </div>
         </div>
 
@@ -1541,6 +1623,22 @@ $pinEnabled = env('TVOS_PIN', '') !== '';
             </div>
         </div>
 
+        <div class="quickMenu" id="quickMenu" aria-hidden="true">
+            <div class="quickMenuScrim" id="quickMenuScrim" aria-hidden="true"></div>
+            <div class="quickMenuPanel" role="dialog" aria-label="Quick Menu">
+                <div class="quickMenuHeader">
+                    <div class="quickMenuHeaderTitle">
+                        <span class="material-symbols-rounded" aria-hidden="true">tune</span>
+                        <h2>Quick Menu</h2>
+                    </div>
+                    <div class="chip">M / Menu</div>
+                </div>
+                <div class="quickMenuBody">
+                    <div class="settingsList" id="quickMenuList" role="list" aria-label="Menu items"></div>
+                </div>
+            </div>
+        </div>
+
         <div class="launcher" id="launcher" role="list" aria-label="Launcher"></div>
     </div>
 
@@ -1566,6 +1664,10 @@ $pinEnabled = env('TVOS_PIN', '') !== '';
         const launcherEl = document.getElementById('launcher');
         const overviewEl = document.getElementById('overview');
         const overviewRowEl = document.getElementById('overviewRow');
+        const menuBtnEl = document.getElementById('menuBtn');
+        const quickMenuEl = document.getElementById('quickMenu');
+        const quickMenuScrimEl = document.getElementById('quickMenuScrim');
+        const quickMenuListEl = document.getElementById('quickMenuList');
         const authPillEl = document.getElementById('authPill');
         const netStatusEl = document.getElementById('netStatus');
         const clockEl = document.getElementById('clock');
@@ -1627,6 +1729,7 @@ $pinEnabled = env('TVOS_PIN', '') !== '';
             focusMode: 'launcher',
             appIndex: 0,
             overviewIndex: 0,
+            menuIndex: 0,
             channelIndex: 0,
             movieIndex: 0,
             appsIndex: 0,
@@ -1647,6 +1750,11 @@ $pinEnabled = env('TVOS_PIN', '') !== '';
             { id: 'google-search', title: 'Google Search', sub: 'Search the web', iconName: 'search', action: 'googleSearch' },
             { id: 'google-products', title: 'Google Products', sub: 'Browse Google apps', iconName: 'apps', url: 'https://about.google/products/' },
             { id: 'youtube', title: 'YouTube', sub: 'Video platform', iconName: 'smart_display', url: 'https://www.youtube.com/' },
+            { id: 'peertube', title: 'PeerTube', sub: 'Open source video (fediverse)', iconName: 'takeout_dining', url: 'https://joinpeertube.org/' },
+            { id: 'jellyfin-demo', title: 'Jellyfin Demo', sub: 'Open source media server UI', iconName: 'movie', url: 'https://demo.jellyfin.org/stable/web/' },
+            { id: 'openverse', title: 'Openverse', sub: 'Creative Commons media search', iconName: 'search', url: 'https://openverse.org/' },
+            { id: 'radio-browser', title: 'Radio Browser', sub: 'Free internet radio directory', iconName: 'radio', url: 'https://www.radio-browser.info/' },
+            { id: 'jamendo', title: 'Jamendo', sub: 'Free music streaming', iconName: 'music_note', url: 'https://www.jamendo.com/' },
             { id: 'gmail', title: 'Gmail', sub: 'Email', iconName: 'mail', url: 'https://mail.google.com/' },
             { id: 'drive', title: 'Google Drive', sub: 'Cloud storage', iconName: 'cloud', url: 'https://drive.google.com/' },
             { id: 'maps', title: 'Google Maps', sub: 'Maps', iconName: 'map', url: 'https://maps.google.com/' },
@@ -1787,6 +1895,7 @@ $pinEnabled = env('TVOS_PIN', '') !== '';
             state.focusMode = mode;
             shell.dataset.focus = mode;
             if (overviewEl) overviewEl.setAttribute('aria-hidden', mode === 'overview' ? 'false' : 'true');
+            if (quickMenuEl) quickMenuEl.setAttribute('aria-hidden', mode === 'menu' ? 'false' : 'true');
         }
 
         function focusLauncher(idx) {
@@ -1796,6 +1905,11 @@ $pinEnabled = env('TVOS_PIN', '') !== '';
 
         function focusOverview(idx) {
             const el = overviewRowEl?.querySelector(`.taskCard[data-index="${idx}"]`);
+            if (el) el.focus();
+        }
+
+        function focusMenu(idx) {
+            const el = quickMenuListEl?.querySelector(`.setItem[data-index="${idx}"]`);
             if (el) el.focus();
         }
 
@@ -1948,6 +2062,164 @@ $pinEnabled = env('TVOS_PIN', '') !== '';
         function closeOverview() {
             setFocusMode('launcher');
             focusLauncher(state.appIndex);
+        }
+
+        function wallpaperOptions() {
+            return [
+                { label: 'Aurora', value: 'aurora' },
+                { label: 'Mango', value: 'mango' },
+                { label: 'Midnight', value: 'midnight' },
+                { label: 'Sunset', value: 'sunset' },
+                { label: 'Forest', value: 'forest' },
+                { label: 'Nebula', value: 'nebula' },
+            ];
+        }
+
+        function themeOptions() {
+            return [
+                { label: 'Aqua', value: 'aqua' },
+                { label: 'Purple', value: 'purple' },
+                { label: 'Mango', value: 'mango' },
+                { label: 'Mono', value: 'mono' },
+            ];
+        }
+
+        function cycleSetting(key, options) {
+            const s = state.settings ?? loadSettings();
+            state.settings = s;
+            const values = options.map((o) => o.value);
+            const cur = s[key];
+            const idx = values.indexOf(cur);
+            const next = values[(idx + 1 + values.length) % values.length];
+            saveSettings({ ...s, [key]: next });
+        }
+
+        function toggleSetting(key) {
+            const s = state.settings ?? loadSettings();
+            state.settings = s;
+            saveSettings({ ...s, [key]: !s[key] });
+        }
+
+        function buildQuickMenuItems() {
+            const s = state.settings ?? loadSettings();
+            state.settings = s;
+            const wpLabel = wallpaperOptions().find((o) => o.value === s.wallpaperPreset)?.label ?? 'Aurora';
+            const themeLabel = themeOptions().find((o) => o.value === s.themePreset)?.label ?? 'Aqua';
+            const items = [
+                { type: 'cycle', title: 'Wallpaper', meta: 'Change background', icon: 'wallpaper', value: wpLabel, action: 'cycle_wallpaper' },
+                { type: 'cycle', title: 'Theme', meta: 'Accent colors', icon: 'palette', value: themeLabel, action: 'cycle_theme' },
+                { type: 'toggle', title: 'Video controls', meta: 'Show/hide native controls', icon: 'tune', value: s.showVideoControls ? 'On' : 'Off', action: 'toggle_video_controls' },
+                { type: 'toggle', title: 'Open links inside OS', meta: 'Built-in browser', icon: 'web', value: s.openLinksInOs ? 'On' : 'Off', action: 'toggle_open_links' },
+                { type: 'toggle', title: 'Reduce motion', meta: 'Less animation', icon: 'motion_photos_off', value: s.reduceMotion ? 'On' : 'Off', action: 'toggle_reduce_motion' },
+                { type: 'action', title: 'App switcher', meta: 'Show running apps', icon: 'window', value: 'Tab', action: 'open_switcher' },
+                { type: 'action', title: 'Home', meta: 'Back to launcher', icon: 'home', value: 'Home', action: 'go_home' },
+                { type: 'action', title: 'Stop playback', meta: 'Stop video/audio', icon: 'stop_circle', value: 'Backspace', action: 'stop_playback' },
+            ];
+            if (pinEnabled) {
+                items.push({ type: 'action', title: 'Log out', meta: 'Lock this TV OS', icon: 'logout', value: 'Esc', action: 'logout' });
+            }
+            items.push({ type: 'action', title: 'Close menu', meta: 'Return to OS', icon: 'close', value: 'Esc', action: 'close_menu' });
+            return items;
+        }
+
+        function renderQuickMenu() {
+            if (!quickMenuListEl) return;
+            const items = buildQuickMenuItems();
+            quickMenuListEl.innerHTML = '';
+            items.forEach((it, idx) => {
+                const row = document.createElement('div');
+                row.className = 'setItem';
+                row.tabIndex = 0;
+                row.dataset.index = String(idx);
+                row.setAttribute('role', 'listitem');
+                row.innerHTML = `
+                    <div class="setLeft">
+                        <div class="setIcon" aria-hidden="true">${materialIcon(it.icon)}</div>
+                        <div class="setText">
+                            <p class="setName">${escapeHtml(it.title)}</p>
+                            <p class="setMeta">${escapeHtml(it.meta)}</p>
+                        </div>
+                    </div>
+                    <div class="setValue">${escapeHtml(it.value ?? '')}</div>
+                `;
+                row.addEventListener('focus', () => {
+                    setFocusMode('menu');
+                    state.menuIndex = idx;
+                });
+                row.addEventListener('click', () => activateQuickMenuItem(idx));
+                quickMenuListEl.appendChild(row);
+            });
+        }
+
+        function openMenu() {
+            state.menuIndex = 0;
+            setFocusMode('menu');
+            renderQuickMenu();
+            focusMenu(state.menuIndex);
+        }
+
+        function closeMenu() {
+            setFocusMode('launcher');
+            focusLauncher(state.appIndex);
+        }
+
+        function activateQuickMenuItem(idx) {
+            const items = buildQuickMenuItems();
+            const it = items[idx];
+            if (!it) return;
+            if (it.action === 'cycle_wallpaper') {
+                cycleSetting('wallpaperPreset', wallpaperOptions());
+                renderQuickMenu();
+                focusMenu(idx);
+                return;
+            }
+            if (it.action === 'cycle_theme') {
+                cycleSetting('themePreset', themeOptions());
+                renderQuickMenu();
+                focusMenu(idx);
+                return;
+            }
+            if (it.action === 'toggle_video_controls') {
+                toggleSetting('showVideoControls');
+                renderQuickMenu();
+                focusMenu(idx);
+                return;
+            }
+            if (it.action === 'toggle_open_links') {
+                toggleSetting('openLinksInOs');
+                renderQuickMenu();
+                focusMenu(idx);
+                return;
+            }
+            if (it.action === 'toggle_reduce_motion') {
+                toggleSetting('reduceMotion');
+                renderQuickMenu();
+                focusMenu(idx);
+                return;
+            }
+            if (it.action === 'open_switcher') {
+                setFocusMode('launcher');
+                openOverview();
+                return;
+            }
+            if (it.action === 'go_home') {
+                closeMenu();
+                return;
+            }
+            if (it.action === 'stop_playback') {
+                stopPlayback();
+                showToast('Stopped');
+                renderQuickMenu();
+                focusMenu(idx);
+                return;
+            }
+            if (it.action === 'logout') {
+                logout();
+                return;
+            }
+            if (it.action === 'close_menu') {
+                closeMenu();
+            }
         }
 
         function renderChannels() {
@@ -2178,6 +2450,8 @@ $pinEnabled = env('TVOS_PIN', '') !== '';
                         { label: 'Mango', value: 'mango' },
                         { label: 'Midnight', value: 'midnight' },
                         { label: 'Sunset', value: 'sunset' },
+                        { label: 'Forest', value: 'forest' },
+                        { label: 'Nebula', value: 'nebula' },
                     ],
                 },
                 {
@@ -2682,6 +2956,25 @@ $pinEnabled = env('TVOS_PIN', '') !== '';
                 return;
             }
 
+            if (e.key === 'ContextMenu' || e.key === 'm' || e.key === 'M') {
+                e.preventDefault();
+                if (state.focusMode === 'menu') {
+                    closeMenu();
+                    return;
+                }
+                openMenu();
+                return;
+            }
+
+            if (e.key === 'Home' || e.key === 'BrowserHome' || e.key === 'GoHome') {
+                e.preventDefault();
+                if (state.focusMode === 'menu') closeMenu();
+                if (state.focusMode === 'overview') closeOverview();
+                setFocusMode('launcher');
+                focusLauncher(state.appIndex);
+                return;
+            }
+
             if (e.key === 'Tab') {
                 e.preventDefault();
                 if (state.focusMode === 'overview') {
@@ -2700,12 +2993,16 @@ $pinEnabled = env('TVOS_PIN', '') !== '';
             }
 
             if (e.key === 'Escape') {
-                if (pinEnabled) {
-                    logout();
+                if (state.focusMode === 'menu') {
+                    closeMenu();
                     return;
                 }
                 if (state.focusMode === 'overview') {
                     closeOverview();
+                    return;
+                }
+                if (pinEnabled) {
+                    logout();
                     return;
                 }
                 if (state.focusMode !== 'launcher') {
@@ -2716,6 +3013,10 @@ $pinEnabled = env('TVOS_PIN', '') !== '';
             }
 
             if (e.key === 'Enter') {
+                if (state.focusMode === 'menu') {
+                    activateQuickMenuItem(state.menuIndex);
+                    return;
+                }
                 if (state.focusMode === 'overview') {
                     state.appIndex = state.overviewIndex;
                     syncActiveApp();
@@ -2747,6 +3048,20 @@ $pinEnabled = env('TVOS_PIN', '') !== '';
 
             if (!['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'].includes(e.key)) return;
             e.preventDefault();
+
+            if (state.focusMode === 'menu') {
+                const max = Math.max(0, (quickMenuListEl?.querySelectorAll('.setItem[data-index]')?.length ?? 0) - 1);
+                let next = state.menuIndex;
+                if (e.key === 'ArrowDown') next = Math.min(max, next + 1);
+                if (e.key === 'ArrowUp') next = Math.max(0, next - 1);
+                if (e.key === 'ArrowLeft' || e.key === 'ArrowRight') {
+                    closeMenu();
+                    return;
+                }
+                state.menuIndex = next;
+                focusMenu(next);
+                return;
+            }
 
             if (state.focusMode === 'overview') {
                 const max = Math.max(0, state.apps.length - 1);
@@ -2856,6 +3171,24 @@ $pinEnabled = env('TVOS_PIN', '') !== '';
         googleSearchBtnEl.addEventListener('click', () => {
             openGoogleSearch(googleQueryInputEl.value);
         });
+
+        menuBtnEl?.addEventListener('click', () => {
+            if (state.focusMode === 'menu') {
+                closeMenu();
+                return;
+            }
+            openMenu();
+        });
+        menuBtnEl?.addEventListener('focus', () => {
+            setFocusMode('launcher');
+        });
+        menuBtnEl?.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                openMenu();
+            }
+        });
+        quickMenuScrimEl?.addEventListener('click', closeMenu);
 
         function closeOsBrowser() {
             browserFrameEl.removeAttribute('src');
