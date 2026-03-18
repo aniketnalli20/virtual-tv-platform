@@ -1900,9 +1900,8 @@ $pinEnabled = env('TVOS_PIN', '') !== '';
                     ? `<span class="material-symbols-rounded" aria-hidden="true">${escapeHtml(app.iconName)}</span>`
                     : escapeHtml(app?.icon ?? '⬚');
 
-                const badge = (route === 'live' || route === 'movies') && state.playing?.type === route
-                    ? `Playing: ${escapeHtml(state.playing.title ?? '…')}`
-                    : routeLabel(route);
+                const isPlaying = (route === 'live' && state.playing?.type === 'channel') || (route === 'movies' && state.playing?.type === 'movie');
+                const badge = isPlaying ? `Playing: ${escapeHtml(state.playing.title ?? '…')}` : routeLabel(route);
 
                 card.innerHTML = `
                     <div class="taskPreview">
