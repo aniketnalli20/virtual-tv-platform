@@ -1244,6 +1244,10 @@ $pinEnabled = env('TVOS_PIN', '') !== '';
         .appIcon[aria-selected="true"]::after{
             display:none;
         }
+        .appIcon[aria-selected="true"]{
+            border-color:rgba(74,214,255,.42);
+            background:linear-gradient(180deg, rgba(255,255,255,.16), rgba(255,255,255,.07));
+        }
         .appGlyph{
             width:46px;
             height:46px;
