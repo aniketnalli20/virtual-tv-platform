@@ -10,8 +10,8 @@ declare(strict_types=1);
         </div>
     </div>
     <div class="statusRight">
-        <div class="chip" id="authPill">Guest</div>
-        <div class="chip" id="netStatus">Offline</div>
+        <div class="chip chipBtn" id="authPill" tabindex="0" role="button" aria-label="Authentication">Guest</div>
+        <div class="chip chipBtn" id="netStatus" tabindex="0" role="button" aria-label="Network status">Offline</div>
         <div class="chip" id="clock">--:--</div>
         <div class="chip chipBtn" id="menuBtn" tabindex="0" role="button" aria-label="Menu">
             <span class="material-symbols-rounded" aria-hidden="true">menu</span>
@@ -19,4 +19,3 @@ declare(strict_types=1);
         </div>
     </div>
 </div>
-
