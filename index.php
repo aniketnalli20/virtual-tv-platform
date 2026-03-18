@@ -1242,6 +1242,156 @@ $pinEnabled = env('TVOS_PIN', '') !== '';
             overflow:hidden;
             text-overflow:ellipsis;
         }
+        .overview{
+            position:fixed;
+            inset:0;
+            display:none;
+            align-items:center;
+            justify-content:center;
+            padding:86px 26px 150px;
+            z-index:9;
+        }
+        .overviewScrim{
+            position:absolute;
+            inset:0;
+            background:linear-gradient(180deg, rgba(0,0,0,.42), rgba(0,0,0,.72));
+            backdrop-filter: blur(10px);
+        }
+        .overviewPanel{
+            position:relative;
+            width:min(1320px, 96vw);
+            display:grid;
+            gap:14px;
+        }
+        .overviewTitle{
+            display:flex;
+            align-items:center;
+            justify-content:space-between;
+            gap:12px;
+            color:rgba(255,255,255,.86);
+        }
+        .overviewTitle h2{
+            margin:0;
+            font-size:14px;
+            letter-spacing:.5px;
+            text-transform:uppercase;
+            color:rgba(255,255,255,.75);
+        }
+        .overviewHint{
+            font-size:12px;
+            color:rgba(255,255,255,.62);
+            white-space:nowrap;
+        }
+        .overviewRow{
+            display:flex;
+            align-items:stretch;
+            gap:16px;
+            overflow-x:auto;
+            padding:6px 2px 12px;
+            scroll-snap-type:x mandatory;
+        }
+        .overviewRow::-webkit-scrollbar{height:8px}
+        .overviewRow::-webkit-scrollbar-thumb{background:rgba(255,255,255,.12); border-radius:999px}
+        .taskCard{
+            width:260px;
+            height:360px;
+            border-radius:26px;
+            border:1px solid rgba(255,255,255,.14);
+            background:linear-gradient(180deg, rgba(255,255,255,.10), rgba(255,255,255,.05));
+            box-shadow:0 18px 70px rgba(0,0,0,.55);
+            backdrop-filter:blur(18px);
+            display:flex;
+            flex-direction:column;
+            overflow:hidden;
+            cursor:pointer;
+            outline:none;
+            user-select:none;
+            scroll-snap-align:center;
+            transition: transform .16s ease, border-color .16s ease, filter .16s ease, box-shadow .16s ease;
+        }
+        .taskCard:focus{
+            box-shadow:var(--focus), 0 18px 70px rgba(0,0,0,.55);
+            border-color:rgba(74,214,255,.60);
+            transform: translateY(-4px) scale(1.02);
+            filter:saturate(1.05);
+        }
+        .taskPreview{
+            flex:1 1 auto;
+            padding:18px 18px 12px;
+            display:flex;
+            flex-direction:column;
+            justify-content:space-between;
+            background:
+                radial-gradient(220px 140px at 20% 25%, rgba(255,255,255,.14), transparent 62%),
+                radial-gradient(240px 160px at 80% 35%, rgba(255,255,255,.10), transparent 62%),
+                linear-gradient(180deg, rgba(0,0,0,.18), rgba(0,0,0,.34));
+        }
+        .taskTop{
+            display:flex;
+            gap:12px;
+            align-items:center;
+            min-width:0;
+        }
+        .taskGlyph{
+            width:54px;
+            height:54px;
+            border-radius:20px;
+            display:grid;
+            place-items:center;
+            color:#061019;
+            border:1px solid rgba(255,255,255,.14);
+            box-shadow:0 16px 34px rgba(0,0,0,.40), inset 0 1px 0 rgba(255,255,255,.22);
+            flex:0 0 auto;
+        }
+        .taskTitleWrap{min-width:0}
+        .taskTitle{
+            margin:0;
+            font-weight:800;
+            font-size:18px;
+            white-space:nowrap;
+            overflow:hidden;
+            text-overflow:ellipsis;
+        }
+        .taskSub{
+            margin:6px 0 0;
+            color:rgba(255,255,255,.68);
+            font-size:12px;
+            white-space:nowrap;
+            overflow:hidden;
+            text-overflow:ellipsis;
+        }
+        .taskMetaRow{
+            display:flex;
+            align-items:center;
+            justify-content:space-between;
+            gap:10px;
+        }
+        .taskBadge{
+            padding:8px 10px;
+            border-radius:999px;
+            border:1px solid rgba(255,255,255,.12);
+            background:rgba(0,0,0,.22);
+            color:rgba(255,255,255,.78);
+            font-size:12px;
+        }
+        .taskActiveDot{
+            width:10px;
+            height:10px;
+            border-radius:999px;
+            background:linear-gradient(135deg, var(--accent), var(--accent2));
+            box-shadow:0 0 0 4px rgba(255,255,255,.08);
+            opacity:0;
+            transform:scale(.9);
+            transition: opacity .16s ease, transform .16s ease;
+            flex:0 0 auto;
+        }
+        .taskCard[data-active="1"] .taskActiveDot{
+            opacity:1;
+            transform:scale(1);
+        }
+        .webos[data-focus="overview"] .overview{display:flex}
+        .webos[data-focus="overview"] .launcher{opacity:.25; filter: blur(2px); pointer-events:none}
+        .webos[data-focus="overview"] .appCard{opacity:.25; filter: blur(6px) saturate(.9); transform: translateY(36px) scale(calc(var(--ui-scale) * .94))}
         .toast{
             bottom:142px;
             z-index:10;
@@ -1269,7 +1419,7 @@ $pinEnabled = env('TVOS_PIN', '') !== '';
                 <div class="brandMark" aria-hidden="true"></div>
                 <div class="statusText">
                     <p class="statusTitle"><?= htmlspecialchars($platformName, ENT_QUOTES, 'UTF-8') ?></p>
-                    <p class="statusSub">OS: <?= htmlspecialchars($osName, ENT_QUOTES, 'UTF-8') ?> · Left/Right: launcher · Up: open · Enter: select</p>
+                    <p class="statusSub">OS: <?= htmlspecialchars($osName, ENT_QUOTES, 'UTF-8') ?> · Left/Right: launcher · Up: open · Tab: switcher · Enter: select</p>
                 </div>
             </div>
             <div class="statusRight">
@@ -1380,6 +1530,17 @@ $pinEnabled = env('TVOS_PIN', '') !== '';
             </div>
         </div>
 
+        <div class="overview" id="overview" aria-hidden="true">
+            <div class="overviewScrim" aria-hidden="true"></div>
+            <div class="overviewPanel">
+                <div class="overviewTitle">
+                    <h2>App Switcher</h2>
+                    <div class="overviewHint">Tab/Esc: close · Enter: open · ←/→: move</div>
+                </div>
+                <div class="overviewRow" id="overviewRow" role="listbox" aria-label="Apps"></div>
+            </div>
+        </div>
+
         <div class="launcher" id="launcher" role="list" aria-label="Launcher"></div>
     </div>
 
@@ -1403,6 +1564,8 @@ $pinEnabled = env('TVOS_PIN', '') !== '';
         const pinEnabled = (shell?.dataset?.pinEnabled ?? '0') === '1';
 
         const launcherEl = document.getElementById('launcher');
+        const overviewEl = document.getElementById('overview');
+        const overviewRowEl = document.getElementById('overviewRow');
         const authPillEl = document.getElementById('authPill');
         const netStatusEl = document.getElementById('netStatus');
         const clockEl = document.getElementById('clock');
@@ -1463,6 +1626,7 @@ $pinEnabled = env('TVOS_PIN', '') !== '';
             server: null,
             focusMode: 'launcher',
             appIndex: 0,
+            overviewIndex: 0,
             channelIndex: 0,
             movieIndex: 0,
             appsIndex: 0,
@@ -1622,10 +1786,16 @@ $pinEnabled = env('TVOS_PIN', '') !== '';
         function setFocusMode(mode) {
             state.focusMode = mode;
             shell.dataset.focus = mode;
+            if (overviewEl) overviewEl.setAttribute('aria-hidden', mode === 'overview' ? 'false' : 'true');
         }
 
         function focusLauncher(idx) {
             const el = launcherEl.querySelector(`.appIcon[data-index="${idx}"]`);
+            if (el) el.focus();
+        }
+
+        function focusOverview(idx) {
+            const el = overviewRowEl?.querySelector(`.taskCard[data-index="${idx}"]`);
             if (el) el.focus();
         }
 
@@ -1694,6 +1864,90 @@ $pinEnabled = env('TVOS_PIN', '') !== '';
                 });
                 launcherEl.appendChild(item);
             });
+            focusLauncher(state.appIndex);
+        }
+
+        function routeLabel(route) {
+            if (route === 'live') return 'Live TV';
+            if (route === 'movies') return 'Movies';
+            if (route === 'apps') return 'Apps';
+            if (route === 'settings') return 'Settings';
+            return 'App';
+        }
+
+        function routeSub(route) {
+            if (route === 'live') return 'Channels and streams';
+            if (route === 'movies') return 'Local / demo VOD';
+            if (route === 'apps') return 'Web apps and links';
+            if (route === 'settings') return 'System preferences';
+            return 'Open';
+        }
+
+        function renderOverview() {
+            if (!overviewRowEl) return;
+            overviewRowEl.innerHTML = '';
+            state.apps.forEach((app, idx) => {
+                const route = String(app?.route ?? '');
+                const card = document.createElement('div');
+                card.className = 'taskCard';
+                card.tabIndex = 0;
+                card.dataset.index = String(idx);
+                card.dataset.active = idx === state.appIndex ? '1' : '0';
+                card.setAttribute('role', 'option');
+                card.setAttribute('aria-selected', idx === state.overviewIndex ? 'true' : 'false');
+
+                const iconHtml = app?.iconName
+                    ? `<span class="material-symbols-rounded" aria-hidden="true">${escapeHtml(app.iconName)}</span>`
+                    : escapeHtml(app?.icon ?? '⬚');
+
+                const badge = (route === 'live' || route === 'movies') && state.playing?.type === route
+                    ? `Playing: ${escapeHtml(state.playing.title ?? '…')}`
+                    : routeLabel(route);
+
+                card.innerHTML = `
+                    <div class="taskPreview">
+                        <div class="taskTop">
+                            <div class="taskGlyph" style="background:${escapeAttr(appColor(app))}" aria-hidden="true">${iconHtml}</div>
+                            <div class="taskTitleWrap">
+                                <p class="taskTitle">${escapeHtml(app?.title ?? 'App')}</p>
+                                <p class="taskSub">${escapeHtml(routeSub(route))}</p>
+                            </div>
+                        </div>
+                        <div class="taskMetaRow">
+                            <div class="taskBadge">${badge}</div>
+                            <div class="taskActiveDot" aria-hidden="true"></div>
+                        </div>
+                    </div>
+                `;
+
+                card.addEventListener('focus', () => {
+                    setFocusMode('overview');
+                    state.overviewIndex = idx;
+                    overviewRowEl.querySelectorAll('.taskCard[data-index]').forEach((el) => {
+                        el.setAttribute('aria-selected', el.dataset.index === String(idx) ? 'true' : 'false');
+                    });
+                    card.scrollIntoView({ block: 'nearest', inline: 'nearest' });
+                });
+                card.addEventListener('click', () => {
+                    state.overviewIndex = idx;
+                    state.appIndex = idx;
+                    syncActiveApp();
+                    setFocusMode('launcher');
+                    openAppFromLauncher(true);
+                });
+                overviewRowEl.appendChild(card);
+            });
+        }
+
+        function openOverview() {
+            state.overviewIndex = state.appIndex;
+            setFocusMode('overview');
+            renderOverview();
+            focusOverview(state.overviewIndex);
+        }
+
+        function closeOverview() {
+            setFocusMode('launcher');
             focusLauncher(state.appIndex);
         }
 
@@ -2429,6 +2683,16 @@ $pinEnabled = env('TVOS_PIN', '') !== '';
                 return;
             }
 
+            if (e.key === 'Tab') {
+                e.preventDefault();
+                if (state.focusMode === 'overview') {
+                    closeOverview();
+                    return;
+                }
+                openOverview();
+                return;
+            }
+
             if (e.key === 'Backspace') {
                 e.preventDefault();
                 stopPlayback();
@@ -2441,6 +2705,10 @@ $pinEnabled = env('TVOS_PIN', '') !== '';
                     logout();
                     return;
                 }
+                if (state.focusMode === 'overview') {
+                    closeOverview();
+                    return;
+                }
                 if (state.focusMode !== 'launcher') {
                     setFocusMode('launcher');
                     focusLauncher(state.appIndex);
@@ -2449,6 +2717,13 @@ $pinEnabled = env('TVOS_PIN', '') !== '';
             }
 
             if (e.key === 'Enter') {
+                if (state.focusMode === 'overview') {
+                    state.appIndex = state.overviewIndex;
+                    syncActiveApp();
+                    setFocusMode('launcher');
+                    openAppFromLauncher(true);
+                    return;
+                }
                 if (state.focusMode === 'launcher') {
                     openAppFromLauncher(true);
                     return;
@@ -2473,6 +2748,18 @@ $pinEnabled = env('TVOS_PIN', '') !== '';
 
             if (!['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'].includes(e.key)) return;
             e.preventDefault();
+
+            if (state.focusMode === 'overview') {
+                const max = Math.max(0, state.apps.length - 1);
+                let next = state.overviewIndex;
+                if (e.key === 'ArrowRight') next = Math.min(max, next + 1);
+                if (e.key === 'ArrowLeft') next = Math.max(0, next - 1);
+                if (e.key === 'ArrowUp' || e.key === 'ArrowDown') return;
+                state.overviewIndex = next;
+                focusOverview(next);
+                overviewRowEl?.querySelector(`.taskCard[data-index="${next}"]`)?.scrollIntoView({ block: 'nearest', inline: 'nearest' });
+                return;
+            }
 
             if (state.focusMode === 'launcher') {
                 const max = Math.max(0, state.apps.length - 1);
