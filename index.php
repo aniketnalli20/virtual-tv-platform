@@ -858,9 +858,14 @@ $pinEnabled = env('TVOS_PIN', '') !== '';
             justify-content:space-between;
             gap:12px;
             pointer-events:none;
+            opacity:0;
+            transform:translateY(10px);
+            transition: opacity .18s ease, transform .18s ease;
+        }
+        .webos[data-focus="channels"] #liveView .playerOverlay,
+        .webos[data-focus="movies"] #moviesView .playerOverlay{
             opacity:1;
             transform:translateY(0);
-            transition: opacity .18s ease, transform .18s ease;
         }
         .playerWrap[data-playing="1"] .playerOverlay{
             opacity:0;
@@ -891,6 +896,7 @@ $pinEnabled = env('TVOS_PIN', '') !== '';
             text-overflow:ellipsis;
         }
         .hint{
+            display:none;
             padding:10px 12px;
             border-radius:18px;
             background:rgba(0,0,0,.36);
@@ -898,6 +904,10 @@ $pinEnabled = env('TVOS_PIN', '') !== '';
             color:rgba(255,255,255,.78);
             font-size:12px;
             backdrop-filter:blur(12px);
+        }
+        .webos[data-focus="channels"] #liveView .hint,
+        .webos[data-focus="movies"] #moviesView .hint{
+            display:block;
         }
         .channelPane{
             display:flex;
