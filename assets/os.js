@@ -21,6 +21,7 @@ const cardSubEl = document.getElementById('cardSub');
 const cardHintEl = document.getElementById('cardHint');
 
 const liveViewEl = document.getElementById('liveView');
+const livePlayerWrapEl = liveViewEl?.querySelector('.playerWrap') ?? null;
 const listEl = document.getElementById('list');
 const channelCountEl = document.getElementById('channelCount');
 const videoEl = document.getElementById('video');
@@ -28,6 +29,7 @@ const nowTitleEl = document.getElementById('nowTitle');
 const nowSubEl = document.getElementById('nowSub');
 
 const moviesViewEl = document.getElementById('moviesView');
+const moviePlayerWrapEl = moviesViewEl?.querySelector('.playerWrap') ?? null;
 const moviesListEl = document.getElementById('moviesList');
 const movieCountEl = document.getElementById('movieCount');
 const movieVideoEl = document.getElementById('movieVideo');
@@ -228,10 +230,25 @@ function stopAllPlayback() {
         try { v.load(); } catch {}
     });
     state.playing = null;
+    if (livePlayerWrapEl) livePlayerWrapEl.dataset.playing = '0';
+    if (moviePlayerWrapEl) moviePlayerWrapEl.dataset.playing = '0';
     nowTitleEl.textContent = 'Nothing playing';
     nowSubEl.textContent = 'Select a channel';
     movieNowTitleEl.textContent = 'Nothing playing';
     movieNowSubEl.textContent = 'Select a movie';
+}
+
+function bindOverlayToPlayback(video, wrap) {
+    if (!video || !wrap) return;
+    const sync = () => {
+        const hasSrc = !!(video.currentSrc || video.getAttribute('src'));
+        const isPlaying = hasSrc && !video.paused && !video.ended;
+        wrap.dataset.playing = isPlaying ? '1' : '0';
+    };
+    ['play', 'playing', 'pause', 'ended', 'emptied', 'error', 'loadedmetadata'].forEach((evt) => {
+        video.addEventListener(evt, sync);
+    });
+    sync();
 }
 
 function setFocusMode(mode) {
@@ -1533,6 +1550,36 @@ menuBtnEl?.addEventListener('keydown', (e) => {
 });
 quickMenuScrimEl?.addEventListener('click', closeMenu);
 
+authPillEl?.addEventListener('click', async () => {
+    if (!pinEnabled) {
+        showToast('PIN lock is disabled', 2200);
+        return;
+    }
+    if (state.authed) {
+        await logout();
+        return;
+    }
+    loginModalEl.style.display = 'flex';
+    pinErrEl.style.display = 'none';
+    pinInputEl.focus();
+});
+authPillEl?.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') authPillEl.click();
+});
+
+netStatusEl?.addEventListener('click', async () => {
+    updateNetworkStatus();
+    try {
+        const d = await apiFetch('/api/health');
+        showToast(`OK · ${d.time}`, 2800);
+    } catch (e) {
+        showToast(String(e?.message ?? e), 3200);
+    }
+});
+netStatusEl?.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') netStatusEl.click();
+});
+
 function closeOsBrowser() {
     browserFrameEl.removeAttribute('src');
     browserViewEl.style.display = 'none';
@@ -1593,6 +1640,8 @@ pinInputEl.addEventListener('keydown', (e) => {
 async function boot() {
     state.settings = loadSettings();
     applySettings();
+    bindOverlayToPlayback(videoEl, livePlayerWrapEl);
+    bindOverlayToPlayback(movieVideoEl, moviePlayerWrapEl);
     updateClock();
     updateNetworkStatus();
     window.setInterval(updateClock, 1000);
