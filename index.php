@@ -3133,7 +3133,7 @@ $pinEnabled = env('TVOS_PIN', '') !== '';
             if (state.focusMode === 'apps') {
                 if (state.activeRoute !== 'apps') return;
                 const cols = window.innerWidth <= 980 ? 2 : 3;
-                const max = Math.max(0, FEATURED_APPS.length - 1);
+                const max = Math.max(0, STORE_ITEMS.length - 1);
                 let next = state.appsIndex;
                 if (e.key === 'ArrowRight') next = Math.min(max, next + 1);
                 if (e.key === 'ArrowLeft') {
@@ -3152,6 +3152,14 @@ $pinEnabled = env('TVOS_PIN', '') !== '';
                 return;
             }
 
+            if (state.focusMode === 'browser') {
+                if (e.key === 'ArrowLeft') {
+                    setFocusMode('launcher');
+                    focusLauncher(state.appIndex);
+                }
+                return;
+            }
+
             if (state.focusMode === 'settings') {
                 if (state.activeRoute !== 'settings') return;
                 const max = Math.max(0, state.settingsItems.length - 1);
@@ -3167,14 +3175,6 @@ $pinEnabled = env('TVOS_PIN', '') !== '';
                 state.settingsIndex = next;
                 focusSetting(next);
             }
-        });
-
-        appUrlBtnEl.addEventListener('click', () => {
-            openExternal(appUrlInputEl.value);
-        });
-
-        googleSearchBtnEl.addEventListener('click', () => {
-            openGoogleSearch(googleQueryInputEl.value);
         });
 
         menuBtnEl?.addEventListener('click', () => {
