@@ -38,10 +38,6 @@ const movieNowSubEl = document.getElementById('movieNowSub');
 
 const appsViewEl = document.getElementById('appsView');
 const appsGridEl = document.getElementById('appsGrid');
-const appUrlInputEl = document.getElementById('appUrlInput');
-const appUrlBtnEl = document.getElementById('appUrlBtn');
-const googleQueryInputEl = document.getElementById('googleQueryInput');
-const googleSearchBtnEl = document.getElementById('googleSearchBtn');
 
 const browserViewEl = document.getElementById('browserView');
 const browserFrameEl = document.getElementById('browserFrame');
@@ -60,6 +56,7 @@ const placeholderViewEl = document.getElementById('placeholderView');
 const phIconEl = document.getElementById('phIcon');
 const phTitleEl = document.getElementById('phTitle');
 const phSubEl = document.getElementById('phSub');
+const phModulesEl = document.getElementById('phModules');
 
 const loginModalEl = document.getElementById('loginModal');
 const pinInputEl = document.getElementById('pinInput');
@@ -90,26 +87,23 @@ const state = {
 
 const SETTINGS_KEY = 'tvos_settings_v1';
 const LAST_PLAY_KEY = 'tvos_last_play_v1';
-const FEATURED_APPS = [
-    { id: 'open-url', title: 'Open URL', sub: 'Launch any website', iconName: 'public', action: 'openUrl' },
-    { id: 'google-search', title: 'Google Search', sub: 'Search the web', iconName: 'search', action: 'googleSearch' },
-    { id: 'google-products', title: 'Google Products', sub: 'Browse Google apps', iconName: 'apps', url: 'https://about.google/products/' },
-    { id: 'youtube', title: 'YouTube', sub: 'Video platform', iconName: 'smart_display', url: 'https://www.youtube.com/' },
-    { id: 'peertube', title: 'PeerTube', sub: 'Open source video (fediverse)', iconName: 'takeout_dining', url: 'https://joinpeertube.org/' },
-    { id: 'jellyfin-demo', title: 'Jellyfin Demo', sub: 'Open source media server UI', iconName: 'movie', url: 'https://demo.jellyfin.org/stable/web/' },
-    { id: 'openverse', title: 'Openverse', sub: 'Creative Commons media search', iconName: 'search', url: 'https://openverse.org/' },
-    { id: 'radio-browser', title: 'Radio Browser', sub: 'Free internet radio directory', iconName: 'radio', url: 'https://www.radio-browser.info/' },
-    { id: 'jamendo', title: 'Jamendo', sub: 'Free music streaming', iconName: 'music_note', url: 'https://www.jamendo.com/' },
-    { id: 'gmail', title: 'Gmail', sub: 'Email', iconName: 'mail', url: 'https://mail.google.com/' },
-    { id: 'drive', title: 'Google Drive', sub: 'Cloud storage', iconName: 'cloud', url: 'https://drive.google.com/' },
-    { id: 'maps', title: 'Google Maps', sub: 'Maps', iconName: 'map', url: 'https://maps.google.com/' },
-    { id: 'calendar', title: 'Google Calendar', sub: 'Calendar', iconName: 'calendar_month', url: 'https://calendar.google.com/' },
-    { id: 'photos', title: 'Google Photos', sub: 'Photos', iconName: 'photo_library', url: 'https://photos.google.com/' },
-    { id: 'docs', title: 'Google Docs', sub: 'Documents', iconName: 'description', url: 'https://docs.google.com/' },
-    { id: 'wikipedia', title: 'Wikipedia', sub: 'Free encyclopedia', iconName: 'language', url: 'https://www.wikipedia.org/' },
-    { id: 'openstreetmap', title: 'OpenStreetMap', sub: 'Free world map', iconName: 'map', url: 'https://www.openstreetmap.org/' },
-    { id: 'archive', title: 'Internet Archive', sub: 'Free library of media', iconName: 'inventory_2', url: 'https://archive.org/' },
+const STORE_ITEMS = [
+    { id: 'app-discovery', title: 'App Discovery', sub: 'Browse available system apps', iconName: 'travel_explore', action: 'notReady' },
+    { id: 'app-updates', title: 'App Updates', sub: 'Manage updates', iconName: 'system_update', action: 'notReady' },
+    { id: 'installed-apps', title: 'Installed Apps', sub: 'View installed apps', iconName: 'apps', action: 'notReady' },
 ];
+
+const MODULES_BY_ROUTE = {
+    live: ['DVB-T TV', 'DVB-C TV', 'DVB-S TV', 'Analog TV', 'EPG', 'TV Tuner'],
+    movies: ['USB Media Player', 'DLNA Player', 'Local Video Player', 'Local Music Player', 'Photo Viewer'],
+    browser: ['Standard Browser', 'Private Browser', 'Download Manager'],
+    mirroring: ['Miracast', 'Chromecast Built-in', 'AirPlay'],
+    apps: ['App Discovery', 'App Updates', 'Installed Apps'],
+    settings: ['Network Settings', 'Display Settings', 'Sound Settings', 'General Settings', 'Device Preferences', 'Privacy Settings', 'System Update', 'Remote & Accessories', 'Storage & Reset'],
+    files: ['Internal Storage', 'USB Storage', 'Network Storage'],
+    notifications: ['System Alerts', 'App Notifications', 'Update Notifications'],
+    input: ['HDMI Inputs', 'AV Input', 'Component Input', 'TV Tuner'],
+};
 
 function apiUrl(path) {
     return `${base}${path}`;
@@ -166,7 +160,6 @@ function loadSettings() {
         showVideoControls: true,
         hlsLowLatency: true,
         backgroundPlayback: false,
-        openLinksInOs: false,
         reduceMotion: false,
         clock24h: true,
         themePreset: 'aqua',
@@ -343,17 +336,27 @@ function renderLauncher() {
 
 function routeLabel(route) {
     if (route === 'live') return 'Live TV';
-    if (route === 'movies') return 'Movies';
-    if (route === 'apps') return 'Apps';
+    if (route === 'movies') return 'Media Player';
+    if (route === 'browser') return 'Web Browser';
+    if (route === 'apps') return 'App Store';
     if (route === 'settings') return 'Settings';
+    if (route === 'mirroring') return 'Screen Mirroring';
+    if (route === 'files') return 'File Manager';
+    if (route === 'notifications') return 'Notifications';
+    if (route === 'input') return 'Input Source';
     return 'App';
 }
 
 function routeSub(route) {
     if (route === 'live') return 'Channels and streams';
-    if (route === 'movies') return 'Local / demo VOD';
-    if (route === 'apps') return 'Web apps and links';
+    if (route === 'movies') return 'USB / DLNA / local media';
+    if (route === 'browser') return 'Standard and private browsing';
+    if (route === 'apps') return 'Discovery, updates, installed apps';
     if (route === 'settings') return 'System preferences';
+    if (route === 'mirroring') return 'Cast and receive';
+    if (route === 'files') return 'Internal / USB / network storage';
+    if (route === 'notifications') return 'System and app alerts';
+    if (route === 'input') return 'HDMI / AV / tuner';
     return 'Open';
 }
 
@@ -469,7 +472,6 @@ function buildQuickMenuItems() {
         { type: 'cycle', title: 'Wallpaper', meta: 'Change background', icon: 'wallpaper', value: wpLabel, action: 'cycle_wallpaper' },
         { type: 'cycle', title: 'Theme', meta: 'Accent colors', icon: 'palette', value: themeLabel, action: 'cycle_theme' },
         { type: 'toggle', title: 'Video controls', meta: 'Show/hide native controls', icon: 'tune', value: s.showVideoControls ? 'On' : 'Off', action: 'toggle_video_controls' },
-        { type: 'toggle', title: 'Open links inside OS', meta: 'Built-in browser', icon: 'web', value: s.openLinksInOs ? 'On' : 'Off', action: 'toggle_open_links' },
         { type: 'toggle', title: 'Reduce motion', meta: 'Less animation', icon: 'motion_photos_off', value: s.reduceMotion ? 'On' : 'Off', action: 'toggle_reduce_motion' },
         { type: 'action', title: 'App switcher', meta: 'Show running apps', icon: 'window', value: 'Tab', action: 'open_switcher' },
         { type: 'action', title: 'Home', meta: 'Back to launcher', icon: 'home', value: 'Home', action: 'go_home' },
@@ -541,12 +543,6 @@ function activateQuickMenuItem(idx) {
     }
     if (it.action === 'toggle_video_controls') {
         toggleSetting('showVideoControls');
-        renderQuickMenu();
-        focusMenu(idx);
-        return;
-    }
-    if (it.action === 'toggle_open_links') {
-        toggleSetting('openLinksInOs');
         renderQuickMenu();
         focusMenu(idx);
         return;
@@ -674,7 +670,7 @@ function renderMovies() {
 
 function renderApps() {
     appsGridEl.innerHTML = '';
-    FEATURED_APPS.forEach((app, idx) => {
+    STORE_ITEMS.forEach((app, idx) => {
         const tile = document.createElement('div');
         tile.className = 'appTile';
         tile.tabIndex = 0;
@@ -703,60 +699,21 @@ function normalizeUrl(url) {
     return `https://${u}`;
 }
 
-function openInOsBrowser(url) {
-    const finalUrl = normalizeUrl(url);
-    if (finalUrl === '') {
-        showToast('Enter a URL', 2200);
-        return;
-    }
-    appsViewEl.style.display = 'none';
-    browserViewEl.style.display = 'block';
-    browserUrlInputEl.value = finalUrl;
-    browserFrameEl.src = finalUrl;
-    setFocusMode('browser');
-    browserUrlInputEl.focus();
-    browserUrlInputEl.select();
-}
-
 function openExternal(url) {
     const finalUrl = normalizeUrl(url);
     if (finalUrl === '') {
         showToast('Enter a URL', 2200);
         return;
     }
-    const s = state.settings ?? loadSettings();
-    state.settings = s;
-    if (s.openLinksInOs) {
-        openInOsBrowser(finalUrl);
-        return;
-    }
     window.open(finalUrl, '_blank', 'noopener,noreferrer');
 }
 
-function openGoogleSearch(query) {
-    const q = String(query ?? '').trim();
-    if (q === '') {
-        openExternal('https://www.google.com/');
-        return;
-    }
-    const url = `https://www.google.com/search?q=${encodeURIComponent(q)}`;
-    openExternal(url);
-}
-
 function activateAppTile(idx) {
-    const app = FEATURED_APPS[idx];
+    const app = STORE_ITEMS[idx];
     if (!app) return;
-    if (app.action === 'openUrl') {
-        appUrlInputEl.focus();
-        appUrlInputEl.select();
-        return;
+    if (app.action === 'notReady') {
+        showToast('Not implemented yet', 2200);
     }
-    if (app.action === 'googleSearch') {
-        googleQueryInputEl.focus();
-        googleQueryInputEl.select();
-        return;
-    }
-    if (app.url) openExternal(app.url);
 }
 
 function buildSettingsItems() {
@@ -783,7 +740,6 @@ function buildSettingsItems() {
         { type: 'toggle', title: 'Video controls', meta: 'Show/hide native controls', icon: 'tune', key: 'showVideoControls' },
         { type: 'toggle', title: 'HLS low latency', meta: 'Hls.js low latency mode', icon: 'speed', key: 'hlsLowLatency' },
         { type: 'toggle', title: 'Background playback', meta: 'Keep playing when switching apps', icon: 'headphones', key: 'backgroundPlayback' },
-        { type: 'toggle', title: 'Open links inside OS', meta: 'Use built-in browser (some sites may block embedding)', icon: 'web', key: 'openLinksInOs' },
         { type: 'toggle', title: 'Reduce motion', meta: 'Disable most animations', icon: 'motion_photos_off', key: 'reduceMotion' },
         { type: 'toggle', title: '24-hour clock', meta: 'Clock format', icon: 'schedule', key: 'clock24h' },
         {
@@ -1035,22 +991,34 @@ function syncActiveApp() {
     state.activeRoute = route;
 
     cardTitleEl.textContent = title;
-    cardHintEl.textContent = route === 'live' ? 'Live TV' : route === 'movies' ? 'Movies' : route === 'apps' ? 'Apps' : route === 'settings' ? 'Settings' : 'Home';
+    cardHintEl.textContent = route === 'live' ? 'Live TV'
+        : route === 'movies' ? 'Media Player'
+            : route === 'browser' ? 'Web Browser'
+                : route === 'apps' ? 'App Store'
+                    : route === 'settings' ? 'Settings'
+                        : route === 'mirroring' ? 'Screen Mirroring'
+                            : route === 'files' ? 'File Manager'
+                                : route === 'notifications' ? 'Notifications'
+                                    : route === 'input' ? 'Input Source'
+                                        : 'Home';
     cardSubEl.textContent = route === 'live'
         ? 'Up/Enter: channels · Left: launcher'
         : route === 'movies'
-            ? 'Up/Enter: movies · Left: launcher'
-            : route === 'apps'
-                ? 'Open URLs and web apps'
-                : route === 'settings'
-                    ? 'Toggles and diagnostics'
-                    : 'Launcher';
+            ? 'Up/Enter: media · Left: launcher'
+            : route === 'browser'
+                ? 'Enter: navigate · Left: launcher'
+                : route === 'apps'
+                    ? 'Enter: open section · Left: launcher'
+                    : route === 'settings'
+                        ? 'Toggles and diagnostics'
+                        : 'Launcher';
 
     liveViewEl.style.display = route === 'live' ? 'grid' : 'none';
     moviesViewEl.style.display = route === 'movies' ? 'grid' : 'none';
     appsViewEl.style.display = route === 'apps' ? 'block' : 'none';
+    browserViewEl.style.display = route === 'browser' ? 'block' : 'none';
     settingsViewEl.style.display = route === 'settings' ? 'block' : 'none';
-    placeholderViewEl.style.display = (route !== 'live' && route !== 'movies' && route !== 'apps' && route !== 'settings') ? 'flex' : 'none';
+    placeholderViewEl.style.display = (route !== 'live' && route !== 'movies' && route !== 'apps' && route !== 'browser' && route !== 'settings') ? 'flex' : 'none';
 
     if (route === 'apps') {
         renderApps();
@@ -1063,7 +1031,11 @@ function syncActiveApp() {
     phTitleEl.textContent = title;
     phSubEl.textContent = route === 'settings'
         ? (pinEnabled ? 'Esc logs out. Backspace stops playback.' : 'PIN lock is disabled. Set TVOS_PIN to enable.')
-        : 'This is a webOS-style UI shell.';
+        : 'System app module list:';
+    if (phModulesEl) {
+        const modules = MODULES_BY_ROUTE[String(route)] ?? [];
+        phModulesEl.innerHTML = modules.length ? modules.map((m) => `<div>${escapeHtml(m)}</div>`).join('') : '';
+    }
 }
 
 function openAppFromLauncher(moveFocus) {
@@ -1077,6 +1049,12 @@ function openAppFromLauncher(moveFocus) {
     if (state.activeRoute === 'movies') {
         setFocusMode('movies');
         focusMovie(state.movieIndex);
+        return;
+    }
+    if (state.activeRoute === 'browser') {
+        setFocusMode('browser');
+        browserUrlInputEl?.focus();
+        browserUrlInputEl?.select?.();
         return;
     }
     if (state.activeRoute === 'apps') {
@@ -1293,26 +1271,6 @@ document.addEventListener('keydown', (e) => {
     const activeTag = activeEl ? String(activeEl.tagName ?? '').toUpperCase() : '';
     const isTyping = activeTag === 'INPUT' || activeTag === 'TEXTAREA' || activeEl?.isContentEditable === true;
     if (isTyping) {
-        if (activeEl === appUrlInputEl && e.key === 'Enter') {
-            openExternal(appUrlInputEl.value);
-            return;
-        }
-        if (activeEl === googleQueryInputEl && e.key === 'Enter') {
-            openGoogleSearch(googleQueryInputEl.value);
-            return;
-        }
-        if (activeEl === appUrlInputEl && e.key === 'Escape') {
-            appUrlInputEl.blur();
-            setFocusMode('apps');
-            focusAppTile(state.appsIndex);
-            return;
-        }
-        if (activeEl === googleQueryInputEl && e.key === 'Escape') {
-            googleQueryInputEl.blur();
-            setFocusMode('apps');
-            focusAppTile(state.appsIndex);
-            return;
-        }
         return;
     }
 
@@ -1488,7 +1446,7 @@ document.addEventListener('keydown', (e) => {
     if (state.focusMode === 'apps') {
         if (state.activeRoute !== 'apps') return;
         const cols = window.innerWidth <= 980 ? 2 : 3;
-        const max = Math.max(0, FEATURED_APPS.length - 1);
+        const max = Math.max(0, STORE_ITEMS.length - 1);
         let next = state.appsIndex;
         if (e.key === 'ArrowRight') next = Math.min(max, next + 1);
         if (e.key === 'ArrowLeft') {
@@ -1507,6 +1465,14 @@ document.addEventListener('keydown', (e) => {
         return;
     }
 
+    if (state.focusMode === 'browser') {
+        if (e.key === 'ArrowLeft') {
+            setFocusMode('launcher');
+            focusLauncher(state.appIndex);
+        }
+        return;
+    }
+
     if (state.focusMode === 'settings') {
         if (state.activeRoute !== 'settings') return;
         const max = Math.max(0, state.settingsItems.length - 1);
@@ -1522,14 +1488,6 @@ document.addEventListener('keydown', (e) => {
         state.settingsIndex = next;
         focusSetting(next);
     }
-});
-
-appUrlBtnEl.addEventListener('click', () => {
-    openExternal(appUrlInputEl.value);
-});
-
-googleSearchBtnEl.addEventListener('click', () => {
-    openGoogleSearch(googleQueryInputEl.value);
 });
 
 menuBtnEl?.addEventListener('click', () => {
@@ -1582,11 +1540,15 @@ netStatusEl?.addEventListener('keydown', (e) => {
 
 function closeOsBrowser() {
     browserFrameEl.removeAttribute('src');
-    browserViewEl.style.display = 'none';
     if (state.activeRoute === 'apps') {
-        appsViewEl.style.display = 'block';
         setFocusMode('apps');
         focusAppTile(state.appsIndex);
+        return;
+    }
+    if (state.activeRoute === 'browser') {
+        setFocusMode('browser');
+        browserUrlInputEl?.focus();
+        browserUrlInputEl?.select?.();
         return;
     }
     setFocusMode('launcher');

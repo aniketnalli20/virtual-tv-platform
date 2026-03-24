@@ -165,8 +165,13 @@ function get_apps(): array
 {
     return [
         ['id' => 'live', 'title' => 'Live TV', 'icon' => '📺', 'iconName' => 'live_tv', 'route' => 'live'],
-        ['id' => 'movies', 'title' => 'Movies', 'icon' => '🎬', 'iconName' => 'movie', 'route' => 'movies'],
-        ['id' => 'apps', 'title' => 'Apps', 'icon' => '🧩', 'iconName' => 'apps', 'route' => 'apps'],
+        ['id' => 'media', 'title' => 'Media Player', 'icon' => '▶️', 'iconName' => 'play_circle', 'route' => 'movies'],
+        ['id' => 'browser', 'title' => 'Web Browser', 'icon' => '🌐', 'iconName' => 'language', 'route' => 'browser'],
+        ['id' => 'mirroring', 'title' => 'Screen Mirroring', 'icon' => '📡', 'iconName' => 'cast', 'route' => 'mirroring'],
+        ['id' => 'store', 'title' => 'App Store', 'icon' => '🛍️', 'iconName' => 'store', 'route' => 'apps'],
+        ['id' => 'files', 'title' => 'File Manager', 'icon' => '📁', 'iconName' => 'folder', 'route' => 'files'],
+        ['id' => 'notifications', 'title' => 'Notifications', 'icon' => '🔔', 'iconName' => 'notifications', 'route' => 'notifications'],
+        ['id' => 'input', 'title' => 'Input Source', 'icon' => '🧷', 'iconName' => 'input', 'route' => 'input'],
         ['id' => 'settings', 'title' => 'Settings', 'icon' => '⚙️', 'iconName' => 'settings', 'route' => 'settings'],
     ];
 }
@@ -1595,15 +1600,7 @@ $pinEnabled = env('TVOS_PIN', '') !== '';
                     </div>
 
                     <div class="viewScroll" id="appsView" style="display:none;">
-                        <div class="sectionTitle">Apps</div>
-                        <div class="row" style="margin-top:12px;">
-                            <input type="text" id="appUrlInput" placeholder="Open URL (https://...)" inputmode="url" autocomplete="url" />
-                            <button class="primary" id="appUrlBtn">Open</button>
-                        </div>
-                        <div class="row" style="margin-top:12px;">
-                            <input type="text" id="googleQueryInput" placeholder="Google Search" autocomplete="off" />
-                            <button class="primary" id="googleSearchBtn">Search</button>
-                        </div>
+                        <div class="sectionTitle">App Store</div>
                         <div class="appsGrid" id="appsGrid" role="list" style="margin-top:14px;"></div>
                     </div>
 
@@ -1637,6 +1634,7 @@ $pinEnabled = env('TVOS_PIN', '') !== '';
                             <div class="placeholderText">
                                 <p class="placeholderTitle" id="phTitle">Apps</p>
                                 <p class="placeholderSub" id="phSub">This is a simple webOS-style UI shell. Live TV plays HLS/MP4 streams.</p>
+                                <div class="placeholderSub" id="phModules"></div>
                             </div>
                         </div>
                     </div>

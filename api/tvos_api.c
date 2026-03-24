@@ -366,8 +366,13 @@ static void send_apps(void) {
     json_ok_start();
     fputs("{\"apps\":[", stdout);
     fputs("{\"id\":\"live\",\"title\":\"Live TV\",\"icon\":\"\xF0\x9F\x93\xBA\",\"iconName\":\"live_tv\",\"route\":\"live\"},", stdout);
-    fputs("{\"id\":\"movies\",\"title\":\"Movies\",\"icon\":\"\xF0\x9F\x8E\xAC\",\"iconName\":\"movie\",\"route\":\"movies\"},", stdout);
-    fputs("{\"id\":\"apps\",\"title\":\"Apps\",\"icon\":\"\xF0\x9F\xA7\xA9\",\"iconName\":\"apps\",\"route\":\"apps\"},", stdout);
+    fputs("{\"id\":\"media\",\"title\":\"Media Player\",\"icon\":\"\xE2\x96\xB6\xEF\xB8\x8F\",\"iconName\":\"play_circle\",\"route\":\"movies\"},", stdout);
+    fputs("{\"id\":\"browser\",\"title\":\"Web Browser\",\"icon\":\"\xF0\x9F\x8C\x90\",\"iconName\":\"language\",\"route\":\"browser\"},", stdout);
+    fputs("{\"id\":\"mirroring\",\"title\":\"Screen Mirroring\",\"icon\":\"\xF0\x9F\x93\xA1\",\"iconName\":\"cast\",\"route\":\"mirroring\"},", stdout);
+    fputs("{\"id\":\"store\",\"title\":\"App Store\",\"icon\":\"\xF0\x9F\x9B\x8D\xEF\xB8\x8F\",\"iconName\":\"store\",\"route\":\"apps\"},", stdout);
+    fputs("{\"id\":\"files\",\"title\":\"File Manager\",\"icon\":\"\xF0\x9F\x93\x81\",\"iconName\":\"folder\",\"route\":\"files\"},", stdout);
+    fputs("{\"id\":\"notifications\",\"title\":\"Notifications\",\"icon\":\"\xF0\x9F\x94\x94\",\"iconName\":\"notifications\",\"route\":\"notifications\"},", stdout);
+    fputs("{\"id\":\"input\",\"title\":\"Input Source\",\"icon\":\"\xF0\x9F\xA7\xB7\",\"iconName\":\"input\",\"route\":\"input\"},", stdout);
     fputs("{\"id\":\"settings\",\"title\":\"Settings\",\"icon\":\"\xE2\x9A\x99\xEF\xB8\x8F\",\"iconName\":\"settings\",\"route\":\"settings\"}", stdout);
     fputs("]}}", stdout);
 }

@@ -71,8 +71,13 @@ function get_apps(): array
 {
     return [
         ['id' => 'live', 'title' => 'Live TV', 'icon' => '📺', 'iconName' => 'live_tv', 'route' => 'live'],
-        ['id' => 'movies', 'title' => 'Movies', 'icon' => '🎬', 'iconName' => 'movie', 'route' => 'movies'],
-        ['id' => 'apps', 'title' => 'Apps', 'icon' => '🧩', 'iconName' => 'apps', 'route' => 'apps'],
+        ['id' => 'media', 'title' => 'Media Player', 'icon' => '▶️', 'iconName' => 'play_circle', 'route' => 'movies'],
+        ['id' => 'browser', 'title' => 'Web Browser', 'icon' => '🌐', 'iconName' => 'language', 'route' => 'browser'],
+        ['id' => 'mirroring', 'title' => 'Screen Mirroring', 'icon' => '📡', 'iconName' => 'cast', 'route' => 'mirroring'],
+        ['id' => 'store', 'title' => 'App Store', 'icon' => '🛍️', 'iconName' => 'store', 'route' => 'apps'],
+        ['id' => 'files', 'title' => 'File Manager', 'icon' => '📁', 'iconName' => 'folder', 'route' => 'files'],
+        ['id' => 'notifications', 'title' => 'Notifications', 'icon' => '🔔', 'iconName' => 'notifications', 'route' => 'notifications'],
+        ['id' => 'input', 'title' => 'Input Source', 'icon' => '🧷', 'iconName' => 'input', 'route' => 'input'],
         ['id' => 'settings', 'title' => 'Settings', 'icon' => '⚙️', 'iconName' => 'settings', 'route' => 'settings'],
     ];
 }
@@ -124,4 +129,3 @@ function get_movies(): array
         ],
     ];
 }
-

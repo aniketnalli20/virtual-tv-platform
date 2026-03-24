@@ -7,7 +7,7 @@ declare(strict_types=1);
         <div class="placeholderText">
             <p class="placeholderTitle" id="phTitle">Apps</p>
             <p class="placeholderSub" id="phSub">This is a webOS-style UI shell. Live TV plays HLS/MP4 streams.</p>
+            <div class="placeholderSub" id="phModules"></div>
         </div>
     </div>
 </div>
-
