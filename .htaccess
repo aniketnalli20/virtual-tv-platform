@@ -1,6 +1,12 @@
+Options +ExecCGI
+AddHandler cgi-script .exe .cgi
+
 RewriteEngine On
+
+RewriteCond %{DOCUMENT_ROOT}/api/tvos_api.exe -f [OR]
+RewriteCond %{DOCUMENT_ROOT}/virtual-tv-platform/api/tvos_api.exe -f
+RewriteRule ^api(/.*)?$ api/tvos_api.exe [L,QSA]
 
 RewriteCond %{REQUEST_FILENAME} !-f
 RewriteCond %{REQUEST_FILENAME} !-d
 RewriteRule ^ index.php [L]
-
