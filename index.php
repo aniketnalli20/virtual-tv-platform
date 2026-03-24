@@ -2343,7 +2343,7 @@ $pinEnabled = env('TVOS_PIN', '') !== '';
                     <div class="chanAvatar" aria-hidden="true">${materialIcon('movie')}</div>
                     <div class="chanText">
                         <p class="chanName">No media</p>
-                        <p class="chanMeta">Configure a movies table or keep demo content</p>
+                        <p class="chanMeta">Configure media sources or keep demo content</p>
                     </div>
                 `;
                 moviesListEl.appendChild(empty);
