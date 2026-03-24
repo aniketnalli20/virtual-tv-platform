@@ -228,7 +228,7 @@ function stopAllPlayback() {
     nowTitleEl.textContent = 'Nothing playing';
     nowSubEl.textContent = 'Select a channel';
     movieNowTitleEl.textContent = 'Nothing playing';
-    movieNowSubEl.textContent = 'Select a movie';
+    movieNowSubEl.textContent = 'Select media';
 }
 
 function bindOverlayToPlayback(video, wrap) {
@@ -636,7 +636,7 @@ function renderMovies() {
         empty.innerHTML = `
             <div class="chanAvatar" aria-hidden="true">${materialIcon('movie')}</div>
             <div class="chanText">
-                <p class="chanName">No movies</p>
+                <p class="chanName">No media</p>
                 <p class="chanMeta">Configure a movies table or keep demo content</p>
             </div>
         `;

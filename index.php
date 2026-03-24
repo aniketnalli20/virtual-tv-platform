@@ -1585,14 +1585,14 @@ $pinEnabled = env('TVOS_PIN', '') !== '';
                             <div class="playerOverlay">
                                 <div class="nowPlaying">
                                     <p class="nowPlayingTitle" id="movieNowTitle">Nothing playing</p>
-                                    <p class="nowPlayingSub" id="movieNowSub">Select a movie</p>
+                                    <p class="nowPlayingSub" id="movieNowSub">Select media</p>
                                 </div>
                                 <div class="hint">Enter: play · Backspace: stop · Left: launcher</div>
                             </div>
                         </div>
                         <div class="channelPane">
                             <div class="channelHeader">
-                                <div class="chip">Movies</div>
+                                <div class="chip">Media Player</div>
                                 <div class="chip" id="movieCount">0</div>
                             </div>
                             <div class="channelList" id="moviesList" role="list"></div>
@@ -1915,7 +1915,7 @@ $pinEnabled = env('TVOS_PIN', '') !== '';
             nowTitleEl.textContent = 'Nothing playing';
             nowSubEl.textContent = 'Select a channel';
             movieNowTitleEl.textContent = 'Nothing playing';
-            movieNowSubEl.textContent = 'Select a movie';
+            movieNowSubEl.textContent = 'Select media';
         }
 
         function bindOverlayToPlayback(video, wrap) {
@@ -2323,7 +2323,7 @@ $pinEnabled = env('TVOS_PIN', '') !== '';
                 empty.innerHTML = `
                     <div class="chanAvatar" aria-hidden="true">${materialIcon('movie')}</div>
                     <div class="chanText">
-                        <p class="chanName">No movies</p>
+                        <p class="chanName">No media</p>
                         <p class="chanMeta">Configure a movies table or keep demo content</p>
                     </div>
                 `;
@@ -3227,11 +3227,15 @@ $pinEnabled = env('TVOS_PIN', '') !== '';
 
         function closeOsBrowser() {
             browserFrameEl.removeAttribute('src');
-            browserViewEl.style.display = 'none';
             if (state.activeRoute === 'apps') {
-                appsViewEl.style.display = 'block';
                 setFocusMode('apps');
                 focusAppTile(state.appsIndex);
+                return;
+            }
+            if (state.activeRoute === 'browser') {
+                setFocusMode('browser');
+                browserUrlInputEl?.focus();
+                browserUrlInputEl?.select?.();
                 return;
             }
             setFocusMode('launcher');
