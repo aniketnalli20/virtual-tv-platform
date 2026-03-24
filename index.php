@@ -747,6 +747,16 @@ $pinEnabled = env('TVOS_PIN', '') !== '';
             overflow:hidden;
             text-overflow:ellipsis;
         }
+        .devMarquee{
+            margin:6px 0 0;
+            padding:6px 10px;
+            border-radius:999px;
+            border:1px solid rgba(255,255,255,.12);
+            background:rgba(0,0,0,.18);
+            color:rgba(255,255,255,.84);
+            font-size:12px;
+            max-width:min(920px, 68vw);
+        }
         .statusRight{
             display:flex;
             align-items:center;
@@ -1519,6 +1529,7 @@ $pinEnabled = env('TVOS_PIN', '') !== '';
                 <div class="statusText">
                     <p class="statusTitle"><?= htmlspecialchars($platformName, ENT_QUOTES, 'UTF-8') ?></p>
                     <p class="statusSub">OS: <?= htmlspecialchars($osName, ENT_QUOTES, 'UTF-8') ?> · Left/Right: launcher · Up: open · Tab: switcher · M/Menu: quick menu · Enter: select</p>
+                    <marquee class="devMarquee" behavior="scroll" direction="left" scrollamount="6">Under development — do not consume any content on this platform.</marquee>
                 </div>
             </div>
             <div class="statusRight">
