@@ -69,16 +69,17 @@ function get_channels(): array
 
 function get_apps(): array
 {
+    $iconBase = 'https://unpkg.com/@tabler/icons@latest/icons/outline';
     return [
-        ['id' => 'live', 'title' => 'Live TV', 'icon' => '📺', 'iconName' => 'live_tv', 'route' => 'live'],
-        ['id' => 'media', 'title' => 'Media Player', 'icon' => '▶️', 'iconName' => 'play_circle', 'route' => 'movies'],
-        ['id' => 'browser', 'title' => 'Web Browser', 'icon' => '🌐', 'iconName' => 'language', 'route' => 'browser'],
-        ['id' => 'mirroring', 'title' => 'Screen Mirroring', 'icon' => '📡', 'iconName' => 'cast', 'route' => 'mirroring'],
-        ['id' => 'store', 'title' => 'App Store', 'icon' => '🛍️', 'iconName' => 'store', 'route' => 'apps'],
-        ['id' => 'files', 'title' => 'File Manager', 'icon' => '📁', 'iconName' => 'folder', 'route' => 'files'],
-        ['id' => 'notifications', 'title' => 'Notifications', 'icon' => '🔔', 'iconName' => 'notifications', 'route' => 'notifications'],
-        ['id' => 'input', 'title' => 'Input Source', 'icon' => '🧷', 'iconName' => 'input', 'route' => 'input'],
-        ['id' => 'settings', 'title' => 'Settings', 'icon' => '⚙️', 'iconName' => 'settings', 'route' => 'settings'],
+        ['id' => 'live', 'title' => 'Live TV', 'iconUrl' => $iconBase . '/device-tv.svg', 'icon' => '📺', 'iconName' => 'live_tv', 'route' => 'live'],
+        ['id' => 'media', 'title' => 'Media Player', 'iconUrl' => $iconBase . '/player-play.svg', 'icon' => '▶️', 'iconName' => 'play_circle', 'route' => 'movies'],
+        ['id' => 'browser', 'title' => 'Web Browser', 'iconUrl' => $iconBase . '/world.svg', 'icon' => '🌐', 'iconName' => 'language', 'route' => 'browser'],
+        ['id' => 'mirroring', 'title' => 'Screen Mirroring', 'iconUrl' => $iconBase . '/cast.svg', 'icon' => '📡', 'iconName' => 'cast', 'route' => 'mirroring'],
+        ['id' => 'store', 'title' => 'App Store', 'iconUrl' => $iconBase . '/shopping-bag.svg', 'icon' => '🛍️', 'iconName' => 'store', 'route' => 'apps'],
+        ['id' => 'files', 'title' => 'File Manager', 'iconUrl' => $iconBase . '/folder.svg', 'icon' => '📁', 'iconName' => 'folder', 'route' => 'files'],
+        ['id' => 'notifications', 'title' => 'Notifications', 'iconUrl' => $iconBase . '/bell.svg', 'icon' => '🔔', 'iconName' => 'notifications', 'route' => 'notifications'],
+        ['id' => 'input', 'title' => 'Input Source', 'iconUrl' => $iconBase . '/plug.svg', 'icon' => '🧷', 'iconName' => 'input', 'route' => 'input'],
+        ['id' => 'settings', 'title' => 'Settings', 'iconUrl' => $iconBase . '/settings.svg', 'icon' => '⚙️', 'iconName' => 'settings', 'route' => 'settings'],
     ];
 }
 

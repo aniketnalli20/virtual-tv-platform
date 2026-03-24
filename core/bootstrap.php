@@ -40,7 +40,11 @@ function request_json(): array
 function base_path(): string
 {
     $scriptName = $_SERVER['SCRIPT_NAME'] ?? '/index.php';
-    $dir = str_replace('\\', '/', dirname($scriptName));
+    $scriptName = str_replace('\\', '/', $scriptName);
+    if (!str_ends_with($scriptName, '.php')) {
+        return '';
+    }
+    $dir = dirname($scriptName);
     return $dir === '/' ? '' : rtrim($dir, '/');
 }
 
@@ -114,4 +118,3 @@ return [
     'osName' => env('TVOS_NAME', 'Mango OS'),
     'pinEnabled' => env('TVOS_PIN', '') !== '',
 ];
-

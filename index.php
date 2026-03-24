@@ -63,7 +63,11 @@ function request_json(): array
 function base_path(): string
 {
     $scriptName = $_SERVER['SCRIPT_NAME'] ?? '/index.php';
-    $dir = str_replace('\\', '/', dirname($scriptName));
+    $scriptName = str_replace('\\', '/', $scriptName);
+    if (!str_ends_with($scriptName, '.php')) {
+        return '';
+    }
+    $dir = dirname($scriptName);
     return $dir === '/' ? '' : rtrim($dir, '/');
 }
 
@@ -163,16 +167,17 @@ function get_channels(): array
 
 function get_apps(): array
 {
+    $iconBase = 'https://unpkg.com/@tabler/icons@latest/icons/outline';
     return [
-        ['id' => 'live', 'title' => 'Live TV', 'icon' => '📺', 'iconName' => 'live_tv', 'route' => 'live'],
-        ['id' => 'media', 'title' => 'Media Player', 'icon' => '▶️', 'iconName' => 'play_circle', 'route' => 'movies'],
-        ['id' => 'browser', 'title' => 'Web Browser', 'icon' => '🌐', 'iconName' => 'language', 'route' => 'browser'],
-        ['id' => 'mirroring', 'title' => 'Screen Mirroring', 'icon' => '📡', 'iconName' => 'cast', 'route' => 'mirroring'],
-        ['id' => 'store', 'title' => 'App Store', 'icon' => '🛍️', 'iconName' => 'store', 'route' => 'apps'],
-        ['id' => 'files', 'title' => 'File Manager', 'icon' => '📁', 'iconName' => 'folder', 'route' => 'files'],
-        ['id' => 'notifications', 'title' => 'Notifications', 'icon' => '🔔', 'iconName' => 'notifications', 'route' => 'notifications'],
-        ['id' => 'input', 'title' => 'Input Source', 'icon' => '🧷', 'iconName' => 'input', 'route' => 'input'],
-        ['id' => 'settings', 'title' => 'Settings', 'icon' => '⚙️', 'iconName' => 'settings', 'route' => 'settings'],
+        ['id' => 'live', 'title' => 'Live TV', 'iconUrl' => $iconBase . '/device-tv.svg', 'icon' => '📺', 'iconName' => 'live_tv', 'route' => 'live'],
+        ['id' => 'media', 'title' => 'Media Player', 'iconUrl' => $iconBase . '/player-play.svg', 'icon' => '▶️', 'iconName' => 'play_circle', 'route' => 'movies'],
+        ['id' => 'browser', 'title' => 'Web Browser', 'iconUrl' => $iconBase . '/world.svg', 'icon' => '🌐', 'iconName' => 'language', 'route' => 'browser'],
+        ['id' => 'mirroring', 'title' => 'Screen Mirroring', 'iconUrl' => $iconBase . '/cast.svg', 'icon' => '📡', 'iconName' => 'cast', 'route' => 'mirroring'],
+        ['id' => 'store', 'title' => 'App Store', 'iconUrl' => $iconBase . '/shopping-bag.svg', 'icon' => '🛍️', 'iconName' => 'store', 'route' => 'apps'],
+        ['id' => 'files', 'title' => 'File Manager', 'iconUrl' => $iconBase . '/folder.svg', 'icon' => '📁', 'iconName' => 'folder', 'route' => 'files'],
+        ['id' => 'notifications', 'title' => 'Notifications', 'iconUrl' => $iconBase . '/bell.svg', 'icon' => '🔔', 'iconName' => 'notifications', 'route' => 'notifications'],
+        ['id' => 'input', 'title' => 'Input Source', 'iconUrl' => $iconBase . '/plug.svg', 'icon' => '🧷', 'iconName' => 'input', 'route' => 'input'],
+        ['id' => 'settings', 'title' => 'Settings', 'iconUrl' => $iconBase . '/settings.svg', 'icon' => '⚙️', 'iconName' => 'settings', 'route' => 'settings'],
     ];
 }
 
@@ -1292,6 +1297,11 @@ $pinEnabled = env('TVOS_PIN', '') !== '';
             box-shadow:0 10px 24px rgba(0,0,0,.35), inset 0 1px 0 rgba(255,255,255,.25);
             border:1px solid rgba(255,255,255,.14);
         }
+        .appGlyph img{
+            width:28px;
+            height:28px;
+            display:block;
+        }
         .appLabel{
             font-size:12px;
             font-weight:600;
@@ -1401,6 +1411,11 @@ $pinEnabled = env('TVOS_PIN', '') !== '';
             border:1px solid rgba(255,255,255,.14);
             box-shadow:0 16px 34px rgba(0,0,0,.40), inset 0 1px 0 rgba(255,255,255,.22);
             flex:0 0 auto;
+        }
+        .taskGlyph img{
+            width:30px;
+            height:30px;
+            display:block;
         }
         .taskTitleWrap{min-width:0}
         .taskTitle{
@@ -1998,9 +2013,11 @@ $pinEnabled = env('TVOS_PIN', '') !== '';
                 item.dataset.index = String(idx);
                 item.setAttribute('aria-selected', idx === state.appIndex ? 'true' : 'false');
 
-                const iconHtml = app?.iconName
-                    ? `<span class="material-symbols-rounded" aria-hidden="true">${escapeHtml(app.iconName)}</span>`
-                    : escapeHtml(app.icon ?? '⬚');
+                const iconHtml = app?.iconUrl
+                    ? `<img src="${escapeAttr(app.iconUrl)}" alt="" loading="lazy" />`
+                    : app?.iconName
+                        ? `<span class="material-symbols-rounded" aria-hidden="true">${escapeHtml(app.iconName)}</span>`
+                        : escapeHtml(app.icon ?? '⬚');
 
                 item.innerHTML = `
                     <div class="appGlyph" style="background:${escapeAttr(appColor(app))}" aria-hidden="true">${iconHtml}</div>
@@ -2060,9 +2077,11 @@ $pinEnabled = env('TVOS_PIN', '') !== '';
                 card.setAttribute('role', 'option');
                 card.setAttribute('aria-selected', idx === state.overviewIndex ? 'true' : 'false');
 
-                const iconHtml = app?.iconName
-                    ? `<span class="material-symbols-rounded" aria-hidden="true">${escapeHtml(app.iconName)}</span>`
-                    : escapeHtml(app?.icon ?? '⬚');
+                const iconHtml = app?.iconUrl
+                    ? `<img src="${escapeAttr(app.iconUrl)}" alt="" loading="lazy" />`
+                    : app?.iconName
+                        ? `<span class="material-symbols-rounded" aria-hidden="true">${escapeHtml(app.iconName)}</span>`
+                        : escapeHtml(app?.icon ?? '⬚');
 
                 const isPlaying = (route === 'live' && state.playing?.type === 'channel') || (route === 'movies' && state.playing?.type === 'movie');
                 const badge = isPlaying ? `Playing: ${escapeHtml(state.playing.title ?? '…')}` : routeLabel(route);

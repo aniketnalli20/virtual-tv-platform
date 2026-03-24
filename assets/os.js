@@ -311,9 +311,11 @@ function renderLauncher() {
         item.dataset.index = String(idx);
         item.setAttribute('aria-selected', idx === state.appIndex ? 'true' : 'false');
 
-        const iconHtml = app?.iconName
-            ? `<span class="material-symbols-rounded" aria-hidden="true">${escapeHtml(app.iconName)}</span>`
-            : escapeHtml(app.icon ?? '⬚');
+        const iconHtml = app?.iconUrl
+            ? `<img src="${escapeAttr(app.iconUrl)}" alt="" loading="lazy" />`
+            : app?.iconName
+                ? `<span class="material-symbols-rounded" aria-hidden="true">${escapeHtml(app.iconName)}</span>`
+                : escapeHtml(app.icon ?? '⬚');
 
         item.innerHTML = `
             <div class="appGlyph" style="background:${escapeAttr(appColor(app))}" aria-hidden="true">${iconHtml}</div>
@@ -373,9 +375,11 @@ function renderOverview() {
         card.setAttribute('role', 'option');
         card.setAttribute('aria-selected', idx === state.overviewIndex ? 'true' : 'false');
 
-        const iconHtml = app?.iconName
-            ? `<span class="material-symbols-rounded" aria-hidden="true">${escapeHtml(app.iconName)}</span>`
-            : escapeHtml(app?.icon ?? '⬚');
+        const iconHtml = app?.iconUrl
+            ? `<img src="${escapeAttr(app.iconUrl)}" alt="" loading="lazy" />`
+            : app?.iconName
+                ? `<span class="material-symbols-rounded" aria-hidden="true">${escapeHtml(app.iconName)}</span>`
+                : escapeHtml(app?.icon ?? '⬚');
 
         const isPlaying = (route === 'live' && state.playing?.type === 'channel') || (route === 'movies' && state.playing?.type === 'movie');
         const badge = isPlaying ? `Playing: ${escapeHtml(state.playing.title ?? '…')}` : routeLabel(route);
